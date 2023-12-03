@@ -153,18 +153,27 @@ class _MysignupState extends State<Mysignup> {
 
   Future<void> _insertData(String fname, String fphonenumber, String femail,
       String fpassword, String frole) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
     // Validate that all text fields are filled
     if (fname.isEmpty ||
         fphonenumber.isEmpty ||
         femail.isEmpty ||
         fpassword.isEmpty ||
         frole == 'Select') {
+      Navigator.pop(context); // Dismiss the dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill in all the fields')),
       );
     } else {
       // Check if the email already exists
       if (await isEmailAlreadyExists(femail)) {
+        Navigator.pop(context); // Dismiss the dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content:
@@ -194,7 +203,6 @@ class _MysignupState extends State<Mysignup> {
       }
     }
   }
-
   Future<bool> isEmailAlreadyExists(String email) async {
     // Query the database to check if the email already exists
     var result = await MongoDatabase.queryEmailExists(email);
