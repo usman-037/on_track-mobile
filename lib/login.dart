@@ -115,17 +115,28 @@ class Login extends StatelessWidget {
   }
 
   Future<void> _performlogin(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
     String femail = emailController.text;
     String fpassword = passwordController.text;
+
     if (await isEmailandPasswordAlreadyExists(femail, fpassword)) {
       String userName = await getUserName(femail);
+      Navigator.pop(context); // Dismiss the dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Login Successful!')),
       );
       // Navigate to the home screen or perform any desired action
       Navigator.pushReplacementNamed(context, '/passengerHome',
-          arguments: {'userName': userName});
+          arguments: {'userName': userName, 'femail': femail});
     } else {
+      Navigator.pop(context); // Dismiss the dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Invalid email or password')),
       );
