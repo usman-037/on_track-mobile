@@ -9,6 +9,8 @@ environment:
 
 dependencies:
   intl: ^0.18.1
+  mailer: ^6.0.1
+  flutter_email_sender: ^5.0.1
   qr_flutter: ^4.1.0
   mongo_dart: ^0.9.3
   fancy_button_flutter: ^1.0.3+1
@@ -33,6 +35,6 @@ flutter:
 
 
   fonts:
-    - family: LuckiestGuy
+    - family: FasterOne
       fonts:
-        - asset: assets/fonts/LuckiestGuy-Regular.ttf
+        - asset: assets/fonts/FasterOne-Regular.ttf

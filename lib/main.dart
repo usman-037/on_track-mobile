@@ -4,6 +4,7 @@ import 'package:ontrack/signup.dart';
 import 'package:ontrack/passenger_home.dart';
 import 'package:ontrack/generateqrcode.dart';
 import 'package:ontrack/splash.dart';
+import 'package:ontrack/verifyEmail.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
 
 void main() async {
@@ -15,9 +16,10 @@ void main() async {
     routes: {
       '/login': (context) => Login(),
       '/signup': (context) => const Mysignup(),
-      '/passengerHome': (context) => const PassengerHome(),
+      '/passengerHome': (context) =>  const PassengerHome(),
       '/generateqrcode': (context) => const GetQrCode(),
-      '/splash': (context) => const Splash()
+      '/splash': (context) => const Splash(),
+      '/verifyEmail': (context) => const VerifyEmail()
     },
   ));
 }

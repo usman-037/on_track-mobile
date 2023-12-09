@@ -52,6 +52,7 @@ class _MysignupState extends State<Mysignup> {
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       child: Scaffold(
         //backgroundColor: Colors.transparent,
@@ -195,14 +196,13 @@ class _MysignupState extends State<Mysignup> {
                                 content: Text('Please fill in all the fields')),
                           );
                         } else {
-                          _insertData(
-                            fnameController.text,
-                            femailController.text,
-                            fpasswordController.text,
-                            selectedRole!,
-                            selectedRoute!,
-                            selectedStop!,
-                          );
+                          _verifyEmail(
+                              fnameController.text,
+                              femailController.text,
+                              fpasswordController.text,
+                              selectedRole!,
+                              selectedRoute!,
+                              selectedStop!);
                         }
                         // Code to be executed when the button is pressed
                       },
@@ -226,19 +226,14 @@ class _MysignupState extends State<Mysignup> {
     );
   }
 
-  Future<void> _insertData(String fname, String femail, String fpassword,
-      String frole, int fRoute, String fStop) async {
+  Future<void> _verifyEmail(String fname, String femail, String fpassword,
+      String frole, int froute, String fstop) async {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => Center(
         child: CircularProgressIndicator(),
       ),
-    );
-
-    Navigator.pop(context); // Dismiss the dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please fill in all the fields')),
     );
 
     // Check if the email already exists
@@ -250,37 +245,25 @@ class _MysignupState extends State<Mysignup> {
                 Text('Email already exists! Please use a different email')),
       );
     } else {
-      var _id = M.ObjectId();
-      final data = MongoDbModel(
-          id: _id,
-          name: fname,
-          email: femail,
-          password: fpassword,
-          role: frole,
-          route: fRoute,
-          stop: fStop);
-      await MongoDatabase.insert(data);
-      fnameController.clear();
-      femailController.clear();
-      fpasswordController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Signup successfully!'),
-          duration: Duration(seconds: 1),
-        ),
-      );
-      Navigator.pushNamed(context, '/login');
+      Navigator.pushNamed(context, '/verifyEmail', arguments: {
+        'fname': fname,
+        'femail': femail,
+        'fpassword': fpassword,
+        'frole': frole,
+        'froute': froute,
+        'fstop': fstop
+      });
     }
+  }
+
+  Future<List<int>> fetchRoutesList() async {
+    List<int> result = await MongoDatabase.queryFetchRoutes();
+    return result; // Return true if email exists, false otherwise
   }
 
   Future<bool> isEmailAlreadyExists(String email) async {
     // Query the database to check if the email already exists
     var result = await MongoDatabase.queryEmailExists(email);
-    return result; // Return true if email exists, false otherwise
-  }
-
-  Future<List<int>> fetchRoutesList() async {
-    List<int> result = await MongoDatabase.queryFetchRoutes();
     return result; // Return true if email exists, false otherwise
   }
 }
