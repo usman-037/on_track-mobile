@@ -1,114 +1,238 @@
 import 'package:flutter/material.dart';
-import 'package:fancy_button_flutter/fancy_button_flutter.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
+import 'package:ontrack/getEmail.dart';
+import 'package:ontrack/signup.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
+  const Login({super.key});
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
   static final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _showPassword = false;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Stack(
-          children: [
-            Container(),
-            Container(
-              alignment: Alignment.topCenter,
-              padding: const EdgeInsets.only(top: 130),
-              child: const Text(
-                'ON TRACK',
-                style: TextStyle(
-                    color: Color.fromARGB(255, 43, 180, 90),
-                    fontSize: 50,
-                    fontFamily: 'LuckiestGuy'),
+    return WillPopScope(
+      onWillPop: ()async{return Future.value(false);},
+      child: Container(
+        child: Scaffold(
+          backgroundColor: Color(0xFFF8F8F8),
+          body: Stack(
+            children: [
+              Positioned(
+                top: -50,
+                left: -35,
+                right: -50,
+                child: Container(
+                  alignment: Alignment.topCenter,
+                  height: 253,
+                  width: 452,
+                  decoration: ShapeDecoration(
+                    color: Color(0xFF03314B),
+                    shape: OvalBorder(),
+                  ),
+                ),
               ),
-            ),
-            SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height * 0.35),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Positioned(
+                left: MediaQuery.of(context).size.width / 6.8,
+                top: MediaQuery.of(context).size.height / 3.25,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      margin: const EdgeInsets.only(left: 35, right: 35),
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: emailController,
-                            style: const TextStyle(color: Colors.black),
-                            decoration: InputDecoration(
-                                fillColor: const Color.fromARGB(27, 0, 0, 0),
-                                filled: true,
-                                hintText: "Email",
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          TextField(
-                            controller: passwordController,
-                            style: const TextStyle(),
-                            obscureText: true,
-                            decoration: InputDecoration(
+                    _buildGradientText(
+                        'ON', [Color(0xFFB0C5D0), Colors.blueGrey]),
+                    _buildGradientText(
+                        'TRACK', [Color(0xFFA9EAFF), Color(0xFF08C4FF)]),
+                  ],
+                ),
+              ),
+              SingleChildScrollView(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Container(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.42),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(left: 35, right: 35),
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: emailController,
+                              maxLength: 30,
+                              style: const TextStyle(
+                                color: Colors.black,
+                              ),
+                              decoration: InputDecoration(
+                                  counterText: '',
+                                  fillColor: const Color.fromARGB(27, 0, 0, 0),
+                                  filled: true,
+                                  hintText: "Email",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  )),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextField(
+                              controller: passwordController,
+                              maxLength: 25,
+                              obscureText: !_showPassword,
+                              decoration: InputDecoration(
+                                counterText: '',
                                 fillColor: const Color.fromARGB(27, 0, 0, 0),
                                 filled: true,
                                 hintText: "Password",
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                )),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                            width: 10,
-                          ),
-                          FancyButton(
-                              button_text: "LOGIN",
-                              button_height: 40,
-                              button_width: MediaQuery.sizeOf(context).width,
-                              button_radius: 10,
-                              button_color: Colors.green,
-                              button_outline_color: Colors.green,
-                              button_outline_width: 1,
-                              button_text_color: Colors.white,
-                              button_icon_color: Colors.white,
-                              icon_size: 22,
-                              button_text_size: 15,
-                              onClick: () {
-                                _performlogin(context);
-                              }),
-                          const SizedBox(
-                            height: 30,
-                            width: 10,
-                          ),
-                          FancyButton(
-                              button_text: "Don't have an account? Sign up",
-                              button_height: 40,
-                              button_width: MediaQuery.sizeOf(context).width,
-                              // button_radius: 10,
-                              button_color: Colors.transparent,
-                              button_outline_color: Colors.transparent,
-                              // button_outline_width: 1,
-                              button_text_color: Colors.black,
-                              button_icon_color: Colors.white,
-                              icon_size: 22,
-                              button_text_size: 15,
-                              onClick: () {
-                                Navigator.pushNamed(context, '/signup');
-                                // print("Button clicked");
-                              }),
-                        ],
-                      ),
-                    )
-                  ],
+                                  borderSide: BorderSide.none,
+                                ),
+                                suffixIcon: IconButton(
+                                  // Add the suffixIcon
+                                  icon: Icon(_showPassword
+                                      ? Icons.visibility
+                                      : Icons.visibility_off),
+                                  onPressed: () {
+                                    setState(() {
+                                      _showPassword = !_showPassword;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                if (emailController.text.isEmpty ||
+                                    passwordController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Please fill in all the fields')),
+                                  );
+                                } else {
+                                  _performlogin(context);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                minimumSize:
+                                    Size(MediaQuery.of(context).size.width, 40),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                backgroundColor: Color(0xFF03314B),
+                              ),
+                              child: const Text(
+                                "LOGIN",
+                                style: TextStyle(
+                                    color: Color(0xFFD7D8E2), fontSize: 15.0),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                              width: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "Don't have an account?",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      PageRouteBuilder(
+                                        pageBuilder: (context, animation,
+                                            secondaryAnimation) {
+                                          return Mysignup();
+                                        },
+                                        transitionsBuilder: (context, animation,
+                                            secondaryAnimation, child) {
+                                          const begin = Offset(1.0, 0.0);
+                                          const end = Offset.zero;
+                                          const curve = Curves.easeInOut;
+
+                                          var tween = Tween(
+                                                  begin: begin, end: end)
+                                              .chain(CurveTween(curve: curve));
+                                          var offsetAnimation =
+                                              animation.drive(tween);
+
+                                          return SlideTransition(
+                                            position: offsetAnimation,
+                                            child: child,
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    "Sign Up",
+                                    style: TextStyle(
+                                      color: Color(0xFF03314B),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    pageBuilder: (context, animation,
+                                        secondaryAnimation) {
+                                      return GetEmail();
+                                    },
+                                    transitionsBuilder: (context, animation,
+                                        secondaryAnimation, child) {
+                                      const begin = Offset(1.0, 0.0);
+                                      const end = Offset.zero;
+                                      const curve = Curves.easeInOut;
+
+                                      var tween = Tween(
+                                          begin: begin, end: end)
+                                          .chain(CurveTween(curve: curve));
+                                      var offsetAnimation =
+                                      animation.drive(tween);
+
+                                      return SlideTransition(
+                                        position: offsetAnimation,
+                                        child: child,
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Forgot Password?",
+                                style: TextStyle(
+                                  color: Color(0xFF03314B),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -118,25 +242,30 @@ class Login extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Center(
+      builder: (context) => const Center(
         child: CircularProgressIndicator(),
       ),
     );
 
     String femail = emailController.text;
     String fpassword = passwordController.text;
-
     if (await isEmailandPasswordAlreadyExists(femail, fpassword)) {
       String userName = await getUserName(femail);
+      int routeNo = await getRouteNo(femail);
       Navigator.pop(context); // Dismiss the dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Login Successful!')),
       );
       // Navigate to the home screen or perform any desired action
-      Navigator.pushReplacementNamed(context, '/passengerHome',
-          arguments: {'userName': userName, 'femail': femail});
+      Navigator.pushReplacementNamed(context, '/passengerHome', arguments: {
+        'userName': userName,
+        'femail': femail,
+        'routeNo': routeNo
+      });
     } else {
       Navigator.pop(context); // Dismiss the dialog
+      emailController.clear();
+      passwordController.clear();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Invalid email or password')),
       );
@@ -148,10 +277,35 @@ class Login extends StatelessWidget {
     return result;
   }
 
+  Future<int> getRouteNo(String femail) async {
+    int result = (await MongoDatabase.queryGetRouteNoFromEmail(femail)) as int;
+    return result;
+  }
+
   Future<bool> isEmailandPasswordAlreadyExists(
       String femail, String fpassword) async {
     var result =
         await MongoDatabase.queryEmailandPasswordExists(femail, fpassword);
     return result;
+  }
+
+  Widget _buildGradientText(String text, List<Color> colors) {
+    return ShaderMask(
+      shaderCallback: (Rect bounds) {
+        return LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ).createShader(bounds);
+      },
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 50,
+          fontFamily: 'FasterOne',
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 }
