@@ -28,29 +28,50 @@ class _SplashState extends State<Splash> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
-          color: Color(0xFF2BB45A),
+          color: Color(0xFF03314B),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              'ON TRACK',
-              style: TextStyle(
-                fontSize: 50,
-                fontFamily: 'LuckiestGuy',
-                color: Colors.white,
+            Padding(
+              padding:
+                  EdgeInsets.only(top: MediaQuery.of(context).size.height / 4),
+              child: Image.asset(
+                'assets/icons/splashLogo.png',
+                width: MediaQuery.of(context).size.width / 1.05,
               ),
             ),
-            Text(
-              'Navigate Your Commute\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tWith Ease',
-              style: TextStyle(
-                fontSize: 18,
-                fontFamily: 'Poppins',
-                color: Colors.white,
-              ),
+            SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildGradientText('ON', [Color(0xFFB0C5D0), Colors.white]),
+                _buildGradientText(
+                    'TRACK', [Color(0xFFA9EAFF), Color(0xFF08C4FF)]),
+              ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGradientText(String text, List<Color> colors) {
+    return ShaderMask(
+      shaderCallback: (Rect bounds) {
+        return LinearGradient(
+          colors: colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ).createShader(bounds);
+      },
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 50,
+          fontFamily: 'FasterOne',
+          color: Colors.white,
         ),
       ),
     );
