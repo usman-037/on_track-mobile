@@ -1,649 +1,440 @@
 import 'package:flutter/material.dart';
+import 'package:ontrack/dbHelper/mongodb.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
-class PassengerHome extends StatelessWidget {
+class PassengerHome extends StatefulWidget {
   const PassengerHome({super.key});
+
+  @override
+  State<PassengerHome> createState() => _PassengerHomeState();
+}
+
+class _PassengerHomeState extends State<PassengerHome> {
 
   @override
   Widget build(BuildContext context) {
     final userName = (ModalRoute.of(context)!.settings.arguments
-        as Map<String, dynamic>)['userName'];
+    as Map<String, dynamic>)['userName'];
     final femail = (ModalRoute.of(context)!.settings.arguments
-        as Map<String, dynamic>)['femail'];
-    return Column(
-      children: [
+    as Map<String, dynamic>)['femail'];
+    final routeNo = (ModalRoute.of(context)!.settings.arguments
+    as Map<String, dynamic>)['routeNo'] as int;
+    late int route;
+    late String stop;
+    late int requestedroute;
+    late String requestedstop;
+    late String status;
+    return Scaffold(
+      backgroundColor: Color(0xFFF8F8F8),
+      appBar: AppBar(
+        backgroundColor: Color(0xFF03314B),
+        centerTitle: true,
+      ),
+      drawer: Drawer(
+        backgroundColor: Color(0xFFE3E2E2),
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text('About'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+              },
+            ),
+            ListTile(
+              title: Text('Logout'),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      content: Text('Are you sure?'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                          child: Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, '/login', (route) => false);
+                          },
+                          child: Text('Logout'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            )
+          ],
+        ),
+      ),
+      body: Stack(children: [
         Container(
           width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          clipBehavior: Clip.antiAlias,
-          decoration: const BoxDecoration(color: Colors.white),
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                top: 0,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 202,
-                  decoration: const BoxDecoration(color: Color(0xFF2BB45A)),
-                ),
-              ),
-              Positioned(
-                left: 28,
-                top: 58,
-                child: Container(
-                  width: 87,
-                  height: 87,
-                  decoration: const ShapeDecoration(
-                    color: Color(0xFFFAF2F2),
-                    shape: OvalBorder(),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 126,
-                top: 30,
-                child: Container(
-                  width: 226,
-                  height: 143,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: ShapeDecoration(
-                    shape: RoundedRectangleBorder(
-                      side:
-                          const BorderSide(width: 1, color: Color(0x009747FF)),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        left: 20,
-                        top: 20,
-                        child: SizedBox(
-                          width: 186,
-                          height: 69,
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                left: 0,
-                                top: 0,
-                                child: SizedBox(
-                                  width: 186,
-                                  height: 69,
-                                  child: DefaultTextStyle(
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontFamily: 'Dela Gothic One',
-                                      fontWeight: FontWeight.w400,
-                                      height: 0,
-                                    ),
-                                    child: Text(
-                                      '$userName',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const Positioned(
-                        left: 20,
-                        top: 109,
-                        child: SizedBox(
-                          width: 186,
-                          height: 34,
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                left: 0,
-                                top: 0,
-                                child: SizedBox(
-                                  width: 186,
-                                  height: 16.75,
-                                  child: DefaultTextStyle(
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontFamily: 'Dela Gothic One',
-                                      fontWeight: FontWeight.w400,
-                                      height: 0,
-                                    ),
-                                    child: Text(
-                                      'Route Number Here',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: MediaQuery.of(context).size.width / 1.75,
-                top: 286,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle the button click here
-                    //Navigator.pushReplacementNamed(context, '/registerbusroute');
-                    Navigator.pushNamed(context, '/generateqrcode',
-                        arguments: {'userName': userName, 'femail': femail});
-                  },
-                  child: Container(
-                    width: 119,
-                    height: 119,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 29, vertical: 8),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                      color: const Color(0xFFEDEDED),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x11000000),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                          spreadRadius: 0,
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image(
-                          image: AssetImage(
-                              'assets/icons/qrcode.png'), // Replace with your image path
-                          width:
-                              50, // Adjust the width according to your preference
-                          height:
-                              50, // Adjust the height according to your preference
-                        ),
-                        const Positioned(
-                          left: 23,
-                          top: 73,
-                          child: SizedBox(
-                            width: 96,
-                            child: DefaultTextStyle(
-                              style: TextStyle(
-                                color: Color(0xFF1E1E1E),
-                                fontSize: 13,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                                height: 0,
-                              ),
-                              child: Text(
-                                'Get \nQR Code',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: MediaQuery.of(context).size.width / 1.75,
-                top: 434,
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    width: 119,
-                    height: 119,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 29, vertical: 8),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                      color: Color(0xFFEDEDED),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x11000000),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                          spreadRadius: 0,
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image(
-                          image: AssetImage(
-                              'assets/icons/routechange.png'), // Replace with your image path
-                          width:
-                              50, // Adjust the width according to your preference
-                          height:
-                              50, // Adjust the height according to your preference
-                        ),
-                        const Positioned(
-                          left: 23,
-                          top: 73,
-                          child: SizedBox(
-                            width: 96,
-                            child: DefaultTextStyle(
-                              style: TextStyle(
-                                color: Color(0xFF1E1E1E),
-                                fontSize: 13,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                                height: 0,
-                              ),
-                              child: Text(
-                                'Request\nRoute Change',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 37,
-                          top: 14,
-                          child: Container(
-                            width: 46,
-                            height: 46,
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: MediaQuery.of(context).size.width / 1.75,
-                top: 286,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle the button click here
-                    Navigator.pushNamed(context, '/registerbusroute');
-                  },
-                  child: Container(
-                    width: 119,
-                    height: 119,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 29, vertical: 8),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                      color: const Color(0xFFEDEDED),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x11000000),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                          spreadRadius: 0,
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image(
-                          image: AssetImage(
-                              'assets/icons/bus.png'), // Replace with your image path
-                          width:
-                              50, // Adjust the width according to your preference
-                          height:
-                              50, // Adjust the height according to your preference
-                        ),
-                        const Positioned(
-                          left: 12,
-                          top: 67,
-                          child: SizedBox(
-                            width: 96,
-                            height: 39,
-                            child: DefaultTextStyle(
-                              style: TextStyle(
-                                color: Color(0xFF1E1E1E),
-                                fontSize: 13,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                                height: 0,
-                              ),
-                              child: Text(
-                                'Register\nBus Route',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 36,
-                          top: 25,
-                          child: Container(
-                            width: 47,
-                            height: 34,
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  left: 1.83,
-                                  top: 1.83,
-                                  child: Container(
-                                    width: 43.33,
-                                    height: 30.33,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: MediaQuery.of(context).size.width / 1.75,
-                top: 434,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle the button click here
-                    //Navigator.pushReplacementNamed(context, '/registerbusroute');
-                  },
-                  child: Container(
-                    width: 119,
-                    height: 119,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 29, vertical: 8),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                      color: Color(0xFFEDEDED),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x11000000),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                          spreadRadius: 0,
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image(
-                          image: AssetImage(
-                              'assets/icons/search.png'), // Replace with your image path
-                          width:
-                              50, // Adjust the width according to your preference
-                          height:
-                              50, // Adjust the height according to your preference
-                        ),
-                        Positioned(
-                            left: 5,
-                            top: 66,
-                            child: SizedBox(
-                              width: 109,
-                              child: DefaultTextStyle(
-                                style: TextStyle(
-                                  color: Color(0xFF1E1E1E),
-                                  fontSize: 13,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400,
-                                  height: 0,
-                                ),
-                                child: Text(
-                                  'Access Lost &\nFound Portal',
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            )),
-                        Positioned(
-                          left: 41,
-                          top: 17,
-                          child: Container(
-                            width: 37,
-                            height: 37,
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: MediaQuery.of(context).size.width / 1.75,
-                top: 582,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle the button click here
-                    //Navigator.pushReplacementNamed(context, '/registerbusroute');
-                  },
-                  child: Container(
-                    width: 119,
-                    height: 119,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 29, vertical: 8),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                      color: Color(0xFFEDEDED),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadows: [
-                        BoxShadow(
-                          color: Color(0x11000000),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                          spreadRadius: 0,
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image(
-                          image: AssetImage(
-                              'assets/icons/edit.png'), // Replace with your image path
-                          width:
-                              50, // Adjust the width according to your preference
-                          height:
-                              50, // Adjust the height according to your preference
-                        ),
-                        Positioned(
-                          left: 12,
-                          top: 66,
-                          child: SizedBox(
-                            width: 96,
-                            child: DefaultTextStyle(
-                              style: TextStyle(
-                                color: Color(0xFF1E1E1E),
-                                fontSize: 13,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                                height: 0,
-                              ),
-                              child: Text(
-                                'Edit\nProfile',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 38,
-                          top: 16,
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: MediaQuery.of(context).size.width / 1.75,
-                top: 582,
-                child: GestureDetector(
-                  onTap: () {
-                    // Handle the button click here
-                    //Navigator.pushReplacementNamed(context, '/registerbusroute');
-                  },
-                  child: Container(
-                    width: 119,
-                    height: 119,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 29, vertical: 8),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
-                      color: Color(0xFFEDEDED),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadows: [
-                        BoxShadow(
-                          color: Color(0x11000000),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                          spreadRadius: 0,
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image(
-                          image: AssetImage(
-                              'assets/icons/message.png'), // Replace with your image path
-                          width:
-                              50, // Adjust the width according to your preference
-                          height:
-                              50, // Adjust the height according to your preference
-                        ),
-                        Positioned(
-                          left: 5,
-                          top: 75,
-                          child: SizedBox(
-                            width: 109,
-                            child: DefaultTextStyle(
-                              style: TextStyle(
-                                color: Color(0xFF1E1E1E),
-                                fontSize: 13,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                                height: 0,
-                              ),
-                              child: Text(
-                                'Report Issue',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 36,
-                          top: 12,
-                          child: Container(
-                            width: 48,
-                            height: 48,
-                            clipBehavior: Clip.antiAlias,
-                            decoration: BoxDecoration(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 39,
-                top: 105,
-                child: DefaultTextStyle(
-                  style: TextStyle(
-                    color: const Color(0xFF18582E),
-                    fontSize: 14,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                    height: 0,
-                  ),
-                  child: Text(
-                    'On Track',
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 48,
-                top: 68,
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(),
-                ),
-              ),
-              Positioned(
-                left: MediaQuery.of(context).size.width / 4.5,
-                top: 227,
-                child: Container(
-                  width: 217,
-                  height: 31,
-                  child: const Stack(
-                    children: [
-                      Positioned(
-                        left: 0,
-                        top: 0,
-                        child: SizedBox(
-                          width: 217,
-                          height: 31,
-                          child: DefaultTextStyle(
-                            style: TextStyle(
-                              color: Color(0xFF2BB45A),
-                              fontSize: 20,
-                              fontFamily: 'Dela Gothic One',
-                              fontWeight: FontWeight.bold,
-                              height: 0,
-                            ),
-                            child: Text(
-                              'Home',
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          height: MediaQuery.of(context).size.height / 6,
+          decoration: BoxDecoration(color: Color(0xFF03314B)),
+        ),
+        Container(
+          alignment: Alignment.topCenter,
+          child: Text(
+            'Hi, $userName',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 25,
+              fontFamily: 'Dela Gothic One',
+              fontWeight: FontWeight.bold,
+              height: 0,
+            ),
           ),
         ),
-      ],
+        const SizedBox(
+          height: 20,
+        ),
+        Padding(
+            padding: EdgeInsets.only(top: 70.0),
+            child: Container(
+              alignment: Alignment.topCenter,
+              child: Text(
+                'Registered Route: $routeNo',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontFamily: 'Dela Gothic One',
+                  fontWeight: FontWeight.w500,
+                  height: 0,
+                ),
+              ),
+            )),
+        Positioned(
+          bottom: MediaQuery.of(context).size.height / 1.33,
+          right: MediaQuery.of(context).size.width / 100,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/editProfile', arguments: {
+                'femail': femail,
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF03314B),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 12,
+              height: 75,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/icons/edit.png',
+                    width: 60,
+                    height: 60,
+                  ),
+                  // ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: MediaQuery.of(context).size.height / 5,
+          left: MediaQuery.of(context).size.width / 25,
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFE3E2E2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 1.25,
+              height: 150,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/icons/trackroute.png',
+                    width: 60,
+                    height: 60,
+                  ),
+                  // ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Track Route',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF1E1E1E),
+                      fontSize: 19,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: MediaQuery.of(context).size.height / 2.4,
+          left: MediaQuery.of(context).size.width / 25,
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFE3E2E2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.17, // Adjust this
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/icons/lostfound.png',
+                    width: 40,
+                    height: 40,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  AutoSizeText(
+                    'Lost & Found Portal',
+                    textAlign: TextAlign.center,
+                    minFontSize: 14,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Color(0xFF1E1E1E),
+                      fontSize: 17,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Button 2
+        Positioned(
+          top: MediaQuery.of(context).size.height / 2.4,
+          left: MediaQuery.of(context).size.width / 2.82,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/generateqrcode',
+                  arguments: {'userName': userName, 'femail': femail});
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFE3E2E2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.16, // Adjust this
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/icons/qrcode.png',
+                    width: 50,
+                    height: 50,
+                  ),
+                  SizedBox(height: 20),
+                  AutoSizeText(
+                    'View QR Code',
+                    textAlign: TextAlign.center,
+                    minFontSize: 14,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Color(0xFF1E1E1E),
+                      fontSize: 17,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Button 3
+        Positioned(
+          top: MediaQuery.of(context).size.height / 2.4,
+          left: MediaQuery.of(context).size.width / 1.5,
+          child: ElevatedButton(
+            onPressed: () async {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+              var result = await MongoDatabase.fetchroute(femail);
+              if (result != null) {
+                route = result['route'];
+                stop = result['stop'];
+              }
+              var resultstatus = await MongoDatabase.getstatus(femail);
+              if (resultstatus != null) {
+                requestedroute = resultstatus['route'];
+                requestedstop = resultstatus['busstop'];
+                status = resultstatus['status'];
+                print(requestedstop);
+                print(requestedroute);
+                print(status);
+              }
+
+              var check = await MongoDatabase.checkroutedata(femail);
+              print(check);
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/requestscreen', arguments: {
+                'femail': femail,
+                'route': route,
+                'stop': stop,
+                'check': check,
+                'requestedroute': requestedroute,
+                'requestedstop': requestedstop,
+                'status': status
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFE3E2E2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.17, // Adjust this
+              height: MediaQuery.of(context).size.height / 6,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/icons/routechange.png',
+                    width: 50,
+                    height: 50,
+                  ),
+                  SizedBox(height: 10),
+                  AutoSizeText(
+                    'Request Route Change',
+                    textAlign: TextAlign.center,
+                    minFontSize: 14,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Color(0xFF1E1E1E),
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        Positioned(
+          top: MediaQuery.of(context).size.height / 1.58,
+          left: MediaQuery.of(context).size.width / 25,
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFE3E2E2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 2.08,
+              height: 150,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/icons/fee.png',
+                    width: 60,
+                    height: 60,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Fee Status',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF1E1E1E),
+                      fontSize: 19,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: MediaQuery.of(context).size.height / 1.58,
+          left: MediaQuery.of(context).size.width / 1.5,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/reportanissue',
+                  arguments: {'femail': femail});
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFE3E2E2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 6,
+              height: 150,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/icons/report.png',
+                    width: 60,
+                    height: 60,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Report Issue',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF1E1E1E),
+                      fontSize: 19,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ]),
     );
   }
+
+  Future<bool> checkrequest(String femail) async {
+    var result = await MongoDatabase.checkrouterequest(femail);
+    return result;
+  }
 }
+

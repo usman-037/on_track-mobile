@@ -22,9 +22,11 @@ class _GetQrCodeState extends State<GetQrCode> {
     femail = arguments['femail'];
 
     return Scaffold(
+      backgroundColor: Color(0xFFF8F8F8),
       appBar: AppBar(
-        title: Text('QR Code'),
-        backgroundColor: Color(0xFF2BB45A),
+        title: Text('View QR Code', style: TextStyle(color: Colors.white)),
+        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Color(0xFF03314B),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -32,17 +34,44 @@ class _GetQrCodeState extends State<GetQrCode> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text(
-              'Attendance will be updated once the QR Code is generated.',
-              style: TextStyle(
-                color: Color(0xFF1E1E1E),
-                fontSize: 13,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w400,
-                height: 1.5,
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  color: Color(0xFF1E1E1E),
+                  fontSize: 16,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5,
+                  height: 1.5,
+                  fontStyle: FontStyle.italic,
+                  //backgroundColor: Color(0xFFE3E2E2),
+                ),
+                children: [
+                  TextSpan(
+                    text: 'Attendance will be updated ',
+                  ),
+                  TextSpan(
+                    text: 'once the QR Code is scanned.',
+                    style: TextStyle(
+                      color: Colors.blue,  // Highlighted portion color
+                      fontWeight: FontWeight.bold,  // Highlighted portion style
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(height: 20),
+            if (qrcodedata.isNotEmpty)
+              Container(
+                width: 281,
+                height: 281,
+                child: QrImageView(
+                  data: qrcodedata,
+                  version: QrVersions.auto,
+                  size: 200.0, // Adjust the size as needed
+                ),
+              ),
+            SizedBox(height: 20.0),
             Container(
               width: 281,
               height: 48,
@@ -51,7 +80,7 @@ class _GetQrCodeState extends State<GetQrCode> {
                   _generateqrcode();
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF2BB45A),
+                  primary: Color(0xFF03314B),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -70,17 +99,7 @@ class _GetQrCodeState extends State<GetQrCode> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            if (qrcodedata.isNotEmpty)
-              Container(
-                width: 281,
-                height: 281,
-                child: QrImageView(
-                  data: qrcodedata,
-                  version: QrVersions.auto,
-                  size: 200.0, // Adjust the size as needed
-                ),
-              ),
+
           ],
         ),
       ),
