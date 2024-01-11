@@ -92,43 +92,95 @@ routerequestModel routerequestModelFromJson(String str) => routerequestModel.fro
 String routerequestModelToJson(routerequestModel data) => json.encode(data.toJson());
 
 class routerequestModel {
-  ObjectId id;
+
   String email;
   String status;
-  int route;
-  String busstop;
-  String routerequest;
+  int currentroute;
+  String currentstop;
+  int requestedroute;
+  String requestedstop;
+  String comments;
   DateTime dateTime;
 
   routerequestModel({
-    required this.id,
+
     required this.email,
     required this.status,
-    required this.route,
-    required this.busstop,
-    required this.routerequest,
+    required this.currentroute,
+    required this.currentstop,
+    required this.requestedroute,
+    required this.requestedstop,
+    required this.comments,
     required this.dateTime,
   });
 
   factory routerequestModel.fromJson(Map<String, dynamic> json) => routerequestModel(
-      id: json["_id"],
-      email: json["email"],
-      status: json["status"],
-      route:json["route"],
-      busstop:json["busstop"],
-      routerequest: json["routerequest"],
-      dateTime: json["dateTime"]
+
+        email: json["email"],
+        status: json["status"],
+        currentroute: json["currentroute"],
+        currentstop: json["currentstop"],
+        requestedroute: json["requestedroute"],
+        requestedstop: json["requestedstop"],
+        comments: json["comments"],
+        dateTime: json["dateTime"],
+
+      );
+
+  Map<String, dynamic> toJson() =>
+      {
+
+        "email": email,
+        "status": status,
+        "currentroute": currentroute,
+        "currentstop": currentstop,
+        "requestedroute": requestedroute,
+        "requestedstop": requestedstop,
+        "comments": comments,
+        "dateTime": dateTime,
+      };
+}
+  ReportAndClaimItemModel ReportAndClaimItemModelFromJson(String str) => ReportAndClaimItemModel.fromJson(json.decode(str));
+  String ReportAndClaimItemModelToJson(routerequestModel data) => json.encode(data.toJson());
+
+class ReportAndClaimItemModel {
+ObjectId id;
+  String itemname;
+  String routeno;
+  String details;
+  String imagepath;
+  String claimby;
+
+  ReportAndClaimItemModel({
+required this.id,
+  required this.itemname,
+  required this.routeno,
+  required this.details,
+  required this.imagepath,
+    required this.claimby,
+  });
+
+  factory ReportAndClaimItemModel.fromJson(Map<String, dynamic> json) => ReportAndClaimItemModel(
+id:json['id'],
+    itemname: json["itemname"],
+  routeno: json["routeno"],
+  details: json["details"],
+  imagepath: json["imagepath"],
+    claimby: json["claimby"],
+
 
   );
 
-  Map<String, dynamic> toJson() => {
-    "_id": id,
-    "email":email,
-    "status":status,
-    "route":route,
-    "busstop":busstop,
-    "routerequest":routerequest,
-    "dateTime":dateTime,
+  Map<String, dynamic> toJson() =>
+  {
+  'id':id,
+  "itemname": itemname,
+  "routeno": routeno,
+  "details": details,
+  "imagepath": imagepath,
+    "claimby":claimby,
   };
 }
+
+
 
