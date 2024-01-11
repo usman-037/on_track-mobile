@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ontrack/change_password.dart';
 import 'package:ontrack/getEmail.dart';
+import 'package:ontrack/hosteliteSignUp.dart';
+import 'package:ontrack/hostelite_home.dart';
 import 'package:ontrack/login.dart';
 import 'package:ontrack/lostandfound.dart';
 import 'package:ontrack/reportanissue.dart';
@@ -35,7 +37,8 @@ void main() async {
       '/getEmail':(context)=>const GetEmail(),
       '/verifyEmailForPassword':(context)=>const VerifyEmailForPassword(),
       '/changePassword':(context)=> const ChangePassword(),
-      '/lostandfound':(context)=> lostandfound(),
+      '/lostandfound':(context)=> const lostandfound(),
+      '/hosteliteHome':(context)=>const HosteliteHome(),
     },
   ));
 }

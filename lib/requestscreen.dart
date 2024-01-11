@@ -13,8 +13,8 @@ class RequestScreen extends StatefulWidget {
 class _RequestScreenState extends State<RequestScreen> {
   Timer? _timer;
   late String femail;
-  late int route;
-  late String stop;
+  //late int currentroute;
+  //late String currentstop;
   late String requeststatus;
   late int requestedroute;
   late String requestedstop;
@@ -30,8 +30,8 @@ class _RequestScreenState extends State<RequestScreen> {
   Widget build(BuildContext context) {
 
     femail = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['femail'];
-    final routes = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['route'];
-    final stops = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['stop'];
+    final currentroute = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['route'];
+    final currentstop = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['stop'];
     final check = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['check'];
     requestedroute = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['requestedroute'];
     requestedstop = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['requestedstop'];
@@ -91,7 +91,7 @@ class _RequestScreenState extends State<RequestScreen> {
                           ),
                         ),
                         Text(
-                          '$routes',
+                          '$currentroute',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
@@ -112,7 +112,7 @@ class _RequestScreenState extends State<RequestScreen> {
                           ),
                         ),
                         Text(
-                          '$stops',
+                          '$currentstop',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
@@ -223,7 +223,7 @@ class _RequestScreenState extends State<RequestScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
-                      'assets/icons/calendar-date.png',
+                      'assets/icons/timer.png',
                       height: 60,
                       width: 60,
                       fit: BoxFit.cover,
@@ -277,7 +277,7 @@ class _RequestScreenState extends State<RequestScreen> {
                     }
                   else {
                     Navigator.pushNamed(context, '/requestroutechange',
-                        arguments: {'femail': femail});
+                        arguments: {'femail': femail,'currentroute':currentroute,'currentstop':currentstop});
                   }
                 },
                 style: ElevatedButton.styleFrom(

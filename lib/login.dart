@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ontrack/choose_account.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
 import 'package:ontrack/getEmail.dart';
 import 'package:ontrack/signup.dart';
@@ -17,7 +18,9 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{return Future.value(false);},
+      onWillPop: () async {
+        return Future.value(false);
+      },
       child: Container(
         child: Scaffold(
           backgroundColor: Color(0xFFF8F8F8),
@@ -51,7 +54,8 @@ class _LoginState extends State<Login> {
                 ),
               ),
               SingleChildScrollView(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Container(
                   padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height * 0.42),
@@ -157,7 +161,7 @@ class _LoginState extends State<Login> {
                                       PageRouteBuilder(
                                         pageBuilder: (context, animation,
                                             secondaryAnimation) {
-                                          return Mysignup();
+                                          return ChooseAccount();
                                         },
                                         transitionsBuilder: (context, animation,
                                             secondaryAnimation, child) {
@@ -203,11 +207,10 @@ class _LoginState extends State<Login> {
                                       const end = Offset.zero;
                                       const curve = Curves.easeInOut;
 
-                                      var tween = Tween(
-                                          begin: begin, end: end)
+                                      var tween = Tween(begin: begin, end: end)
                                           .chain(CurveTween(curve: curve));
                                       var offsetAnimation =
-                                      animation.drive(tween);
+                                          animation.drive(tween);
 
                                       return SlideTransition(
                                         position: offsetAnimation,
@@ -252,23 +255,37 @@ class _LoginState extends State<Login> {
     if (await isEmailandPasswordAlreadyExists(femail, fpassword)) {
       String userName = await getUserName(femail);
       int routeNo = await getRouteNo(femail);
-      Navigator.pop(context); // Dismiss the dialog
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login Successful!')),
-      );
-      // Navigate to the home screen or perform any desired action
-      Navigator.pushReplacementNamed(context, '/passengerHome', arguments: {
-        'userName': userName,
-        'femail': femail,
-        'routeNo': routeNo
-      });
-    } else {
-      Navigator.pop(context); // Dismiss the dialog
-      emailController.clear();
-      passwordController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid email or password')),
-      );
+      String accountType = await MongoDatabase.fetchAccountType(femail);
+      if (accountType == "Hostelite") {
+        Navigator.pop(context); // Dismiss the dialog
+        Navigator.pushReplacementNamed(context, '/hosteliteHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+      }
+      else if(accountType=="Guardian"){
+        Navigator.pop(context); // Dismiss the dialog
+        Navigator.pushReplacementNamed(context, '/GuardianHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+      }
+      else if (accountType == "Student" || accountType=="Faculty") {
+        Navigator.pop(context); // Dismiss the dialog
+        Navigator.pushReplacementNamed(context, '/passengerHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+      } else {
+        Navigator.pop(context); // Dismiss the dialog
+        emailController.clear();
+        passwordController.clear();
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Invalid email or password')));
+      }
     }
   }
 

@@ -12,7 +12,7 @@ class Mysignup extends StatefulWidget {
 }
 
 class _MysignupState extends State<Mysignup> {
-  List<String> role = ['Student', 'Teacher'];
+  List<String> role = ['Student', 'Faculty'];
   List<int> routes = [];
   List<String> stops = [];
   String? selectedRole;

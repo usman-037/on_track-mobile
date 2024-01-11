@@ -11,7 +11,7 @@ class Reportanissue extends StatefulWidget {
 }
 
 class Reportanissuestate extends State<Reportanissue> {
-  List<String> type = ['Bus', 'Driver', 'A Bug','Other'];
+  List<String> type = ['Bus', 'Driver', 'A Bug', 'Other'];
   String? selectedType;
   late String femail;
 //late String description;
@@ -42,7 +42,6 @@ class Reportanissuestate extends State<Reportanissue> {
         ),
         body: TabBarView(children: [
           Container(
-
             child: Column(
               children: [
                 Card(
@@ -50,7 +49,6 @@ class Reportanissuestate extends State<Reportanissue> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -119,11 +117,11 @@ class Reportanissuestate extends State<Reportanissue> {
                 ),
                 SizedBox(height: 10),
                 Container(
-                  width: MediaQuery.of(context).size.width/2, // Adjust the width
-                  height: MediaQuery.of(context).size.height/15,
+                  width:
+                      MediaQuery.of(context).size.width / 2, // Adjust the width
+                  height: MediaQuery.of(context).size.height / 15,
                   child: ElevatedButton(
                     onPressed: () async {
-
                       showDialog(
                         context: context,
                         barrierDismissible: false,
@@ -131,9 +129,9 @@ class Reportanissuestate extends State<Reportanissue> {
                           child: CircularProgressIndicator(),
                         ),
                       );
-                      bool result=await checklimit();
-                      bool check=await checkuser();
-                      int count=await fetchCount();
+                      bool result = await checklimit();
+                      bool check = await checkuser();
+                      int count = await fetchCount();
 
                       if (selectedType == null ||
                           descriptionController.text.isEmpty) {
@@ -141,26 +139,23 @@ class Reportanissuestate extends State<Reportanissue> {
                           SnackBar(
                               content: Text('Please fill in all the fields')),
                         );
-                      }
-                      else if(result)
-                      {
-                        if (check)
-                          {
-                      insertreportdata(femail, selectedType!,
-                      descriptionController.text, 'Unfulfilled',1);
-
-                          }
-                        else
-                        {
+                      } else if (result) {
+                        if (check) {
                           insertreportdata(femail, selectedType!,
-                              descriptionController.text, 'Unfulfilled',count+1);
+                              descriptionController.text, 'Unfulfilled', 1);
+                        } else {
+                          insertreportdata(
+                              femail,
+                              selectedType!,
+                              descriptionController.text,
+                              'Unfulfilled',
+                              count + 1);
                         }
-                        }
-                      else
-                      {
+                      } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('You have reached the maximum report limit.'),
+                            content: Text(
+                                'You have reached the maximum report limit.'),
                           ),
                         );
                         Navigator.pop(context);
@@ -188,7 +183,8 @@ class Reportanissuestate extends State<Reportanissue> {
             ),
           ),
           SingleChildScrollView(
-              child: Column(children: [
+            child: Column(
+              children: [
                 FutureBuilder<List<Map<String, dynamic>>?>(
                   future: MongoDatabase.fetchUserReportHistory(femail),
                   builder: (context, snapshot) {
@@ -212,7 +208,8 @@ class Reportanissuestate extends State<Reportanissue> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Subject',
@@ -233,7 +230,8 @@ class Reportanissuestate extends State<Reportanissue> {
                                   ),
                                   SizedBox(height: 20),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Description',
@@ -254,7 +252,8 @@ class Reportanissuestate extends State<Reportanissue> {
                                   ),
                                   SizedBox(height: 20),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Status',
@@ -283,17 +282,21 @@ class Reportanissuestate extends State<Reportanissue> {
                   },
                 ),
               ],
-              ),
+            ),
           ),
         ]),
       ),
     );
   }
 
-  Future<void> insertreportdata(
-      String femail, String type, String description, String status,int reportcount) async {
+  Future<void> insertreportdata(String femail, String type, String description,
+      String status, int reportcount) async {
     final data = reportissueModel(
-        email: femail, type: type, description: description, status: status,reportcount: reportcount);
+        email: femail,
+        type: type,
+        description: description,
+        status: status,
+        reportcount: reportcount);
     await MongoDatabase.insertReport(data);
     setState(() {
       selectedType = null;
@@ -308,19 +311,18 @@ class Reportanissuestate extends State<Reportanissue> {
     );
   }
 
-Future<bool> checklimit()
-async {
-  var result=await MongoDatabase.checkReportLimit(femail);
-  return result;
-}
-  Future<bool> checkuser()
-  async {
-    var result=await MongoDatabase.checkuserexist(femail);
+  Future<bool> checklimit() async {
+    var result = await MongoDatabase.checkReportLimit(femail);
     return result;
   }
-  Future<int> fetchCount()
-  async {
-    var result=await MongoDatabase.fetchcount(femail);
+
+  Future<bool> checkuser() async {
+    var result = await MongoDatabase.checkuserexist(femail);
+    return result;
+  }
+
+  Future<int> fetchCount() async {
+    var result = await MongoDatabase.fetchcount(femail);
     return result;
   }
 }

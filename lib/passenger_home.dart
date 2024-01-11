@@ -10,15 +10,14 @@ class PassengerHome extends StatefulWidget {
 }
 
 class _PassengerHomeState extends State<PassengerHome> {
-
   @override
   Widget build(BuildContext context) {
     final userName = (ModalRoute.of(context)!.settings.arguments
-    as Map<String, dynamic>)['userName'];
+        as Map<String, dynamic>)['userName'];
     final femail = (ModalRoute.of(context)!.settings.arguments
-    as Map<String, dynamic>)['femail'];
+        as Map<String, dynamic>)['femail'];
     final routeNo = (ModalRoute.of(context)!.settings.arguments
-    as Map<String, dynamic>)['routeNo'] as int;
+        as Map<String, dynamic>)['routeNo'] as int;
     late int route;
     late String stop;
     late int requestedroute;
@@ -84,7 +83,7 @@ class _PassengerHomeState extends State<PassengerHome> {
             style: const TextStyle(
               color: Colors.white,
               fontSize: 25,
-              fontFamily: 'Dela Gothic One',
+              fontFamily: 'Lato',
               fontWeight: FontWeight.bold,
               height: 0,
             ),
@@ -185,7 +184,10 @@ class _PassengerHomeState extends State<PassengerHome> {
           top: MediaQuery.of(context).size.height / 2.4,
           left: MediaQuery.of(context).size.width / 25,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/lostandfound',
+                  arguments: {'userName': userName, 'femail': femail});
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFE3E2E2),
               shape: RoundedRectangleBorder(
@@ -297,8 +299,11 @@ class _PassengerHomeState extends State<PassengerHome> {
                 print(requestedstop);
                 print(requestedroute);
                 print(status);
+              } else {
+                requestedroute = 0;
+                requestedstop = 'null';
+                status = 'null';
               }
-
               var check = await MongoDatabase.checkroutedata(femail);
               print(check);
               Navigator.pop(context);
@@ -437,4 +442,3 @@ class _PassengerHomeState extends State<PassengerHome> {
     return result;
   }
 }
-

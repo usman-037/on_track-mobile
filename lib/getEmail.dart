@@ -23,7 +23,11 @@ class _GetEmailState extends State<GetEmail> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Forgot Password'),
+          title: Text('Forgot Password',
+            style: TextStyle(color: Colors.white),
+          ),
+
+          backgroundColor: Color(0xFF03314B),
         ),
         body: Padding(
             padding: const EdgeInsets.all(16.0),

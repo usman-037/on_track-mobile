@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ontrack/MongoDBModel.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
 import 'package:mongo_dart/mongo_dart.dart' as M;
@@ -20,7 +19,8 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
   String? selectedStops;
   TextEditingController commentController = new TextEditingController(); // Add comment controller
   late String femail;
-
+  late int currentroute;
+  late String currentstop;
   @override
   void initState() {
     super.initState();
@@ -39,7 +39,8 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
   Widget build(BuildContext context) {
     Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     femail = arguments['femail'];
-
+    currentroute=arguments['currentroute'];
+    currentstop=arguments['currentstop'];
     return Scaffold(
       backgroundColor: Color(0xFFF8F8F8),
       appBar: AppBar(
@@ -140,6 +141,8 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
                           );
                           } else {
                   _insertData(
+                    currentroute,
+                    currentstop,
                     selectedRoute!,
                     selectedStops!,
                     commentController.text,
@@ -194,7 +197,7 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
     Navigator.pop(context);
   }
 
-  Future<void> _insertData(int froute,String fbusstops,String frouterequest) async {
+  Future<void> _insertData(int fcurrentroute,String fcurrentstop,int frequestedroute,String frequestedstop,String fcomments) async {
     DateTime currentDate = DateTime.now();
     showDialog(
       context: context,
@@ -211,10 +214,12 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
       final data = routerequestModel(
           id: _id,
           email: femail,
-          route: froute,
-          busstop: fbusstops,
+          currentroute: fcurrentroute,
+          currentstop: fcurrentstop,
+          requestedroute: frequestedroute,
+          requestedstop: frequestedstop,
           status: "Unfulfilled",
-          routerequest: frouterequest,
+          comments: fcomments,
           dateTime:currentDate);
       await MongoDatabase.insertRequest(data);
       setState(() {

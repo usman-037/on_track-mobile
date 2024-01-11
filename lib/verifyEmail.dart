@@ -52,7 +52,11 @@ class _VerifyEmailState extends State<VerifyEmail> {
     final _codeController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Email Verification'),
+        title: Text('Email Verification',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Color(0xFF03314B),
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
