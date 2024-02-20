@@ -7,3 +7,5 @@ const ROUTEREQUEST_COLLECTION="changerouterequest";
 
 const REPORTISSUE_COLLECTION="reportissue";
 const REPORTANDCLAIMLOSTITEMS_COLLECTION="reportandclaimlostitems";
+
+const GUARDIAN_COLLECTION="guardian";

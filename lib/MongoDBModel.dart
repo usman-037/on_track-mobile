@@ -154,7 +154,7 @@ class ReportAndClaimItemModel {
   String itemname;
   String routeno;
   String details;
-  String imagepath;
+  String base64string;
   String claimby;
 
   ReportAndClaimItemModel({
@@ -162,7 +162,7 @@ class ReportAndClaimItemModel {
     required this.itemname,
     required this.routeno,
     required this.details,
-    required this.imagepath,
+    required this.base64string,
     required this.claimby,
   });
 
@@ -172,7 +172,7 @@ class ReportAndClaimItemModel {
         itemname: json["itemname"],
         routeno: json["routeno"],
         details: json["details"],
-        imagepath: json["imagepath"],
+        base64string: json["base64string"],
         claimby: json["claimby"],
       );
 
@@ -181,7 +181,32 @@ class ReportAndClaimItemModel {
         "itemname": itemname,
         "routeno": routeno,
         "details": details,
-        "imagepath": imagepath,
+        "base64string": base64string,
         "claimby": claimby,
       };
+}
+class GuardianModel {
+  String name,phoneNo,password,studentEmail;
+
+  GuardianModel({
+    required this.name,
+    required this.phoneNo,
+    required this.password,
+    required this.studentEmail,
+  });
+
+  factory GuardianModel.fromJson(Map<String, dynamic> json) =>
+      GuardianModel(
+        name: json["name"],
+        phoneNo: json["phoneNo"],
+        password: json["password"],
+        studentEmail: json["studentEmail"],
+      );
+
+  Map<String, dynamic> toJson() => {
+    "name": name,
+    "phoneNo": phoneNo,
+    "password": password,
+    "studentEmail": studentEmail,
+  };
 }

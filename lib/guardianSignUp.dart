@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:ontrack/MongoDBModel.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server/gmail.dart';
-import 'dart:math';
-
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 
 class GuardianSignUp extends StatefulWidget {
   const GuardianSignUp({super.key});
@@ -13,6 +11,7 @@ class GuardianSignUp extends StatefulWidget {
 }
 
 class _GuardianSignUpState extends State<GuardianSignUp> {
+  BuildContext? _qrDialogContext;
   List<int> routes = [];
   List<String> stops = [];
   String? selectedRole;
@@ -22,8 +21,8 @@ class _GuardianSignUpState extends State<GuardianSignUp> {
   bool _showPassword2 = false;
   late String code;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  // late QRViewController controller;
   String qrData = '';
+
   @override
   void initState() {
     super.initState();
@@ -57,8 +56,6 @@ class _GuardianSignUpState extends State<GuardianSignUp> {
   var fphoneController = new TextEditingController();
   var fpasswordController = new TextEditingController();
   var retypepasswordController = new TextEditingController();
-  var getEmailController=new TextEditingController();
-  var getNameController=new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +196,7 @@ class _GuardianSignUpState extends State<GuardianSignUp> {
                       onPressed: () {
                         if (fnameController.text.isEmpty ||
                             fphoneController.text.isEmpty ||
-                            fpasswordController.text.isEmpty ){
+                            fpasswordController.text.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                                 content: Text('Please fill in all the fields')),
@@ -212,19 +209,12 @@ class _GuardianSignUpState extends State<GuardianSignUp> {
                           fpasswordController.clear();
                           retypepasswordController.clear();
                         } else {
-                         scanQrCode();
-                          // _verifyEmail(
-                          //     fnameController.text,
-                          //     fphoneController.text,
-                          //     fpasswordController.text,
-                          //     selectedRole = "Hostelite",
-                          //     selectedRoute = 0,
-                          //     selectedStop = 'null');
+                          _startQRScanner();
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize:
-                            Size(MediaQuery.of(context).size.width, 40),
+                        Size(MediaQuery.of(context).size.width, 40),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -245,133 +235,130 @@ class _GuardianSignUpState extends State<GuardianSignUp> {
       ),
     );
   }
-  Future<void> scanQrCode() async {
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => Scaffold(
-    //       body: QRView(
-    //         key: qrKey,
-    //         onQRViewCreated: _onQRViewCreated,
-    //       ),
-    //     ),
-    //   ),
-    // );
-  }
 
-  // void _onQRViewCreated(QRViewController controller) {
-    // this.controller = controller;
-    // controller.scannedDataStream.listen((scanData) {
-    //   setState(() {
-    //     qrData = scanData.code!;
-    //     List<String> qrParts = qrData.split('|');
-    //
-    //     getEmailController.text = qrParts[0];
-    //     getNameController.text = qrParts[1];
-    //   });
-    //
-    //   // Add any additional processing or validation logic as needed
-    //
-    //   Navigator.pop(context); // Close the QR code scanner screen
-    // });
-  // }
-  // Future<void> _verifyEmail(String fname, String femail, String fpassword,
-  //     String frole, int froute, String fstop) async {
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (context) => Center(
-  //       child: CircularProgressIndicator(),
-  //     ),
-  //   );
-  //
-  //   // Check if the email already exists
-  //   if (await isEmailAlreadyExists(femail)) {
-  //     Navigator.pop(context); // Dismiss the dialog
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //           content:
-  //               Text('Email already exists! Please use a different email')),
-  //     );
-  //     fphoneController.clear();
-  //   } else if (await _sendCode(femail)) {
-  //     Navigator.pushNamed(context, '/verifyEmail', arguments: {
-  //       'fname': fname,
-  //       'femail': femail,
-  //       'fpassword': fpassword,
-  //       'frole': frole,
-  //       'froute': froute,
-  //       'fstop': fstop,
-  //       'matchCode': code
-  //     }).then((_) {
-  //       Navigator.pop(context);
-  //     });
-  //   } else {
-  //     Navigator.pop(context); // Dismiss the dialog
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('Incorrect email!')),
-  //     );
-  //     fphoneController.clear();
-  //   }
-  // }
-  //
   Future<List<int>> fetchRoutesList() async {
     List<int> result = await MongoDatabase.queryFetchRoutes();
     return result; // Return true if email exists, false otherwise
   }
-  //
-  // Future<bool> isEmailAlreadyExists(String email) async {
-  //   // Query the database to check if the email already exists
-  //   var result = await MongoDatabase.queryEmailExists(email);
-  //   return result; // Return true if email exists, false otherwise
-  // }
-  //
-  // String _generateRandomCode() {
-  //   Random random = Random();
-  //   return (100000 + random.nextInt(900000)).toString();
-  // }
-  //
-  // Future<bool> _sendCode(String femail) async {
-  //   code = _generateRandomCode();
-  //   try {
-  //     var userEmail = 'ontrackfyp@gmail.com';
-  //     var password = 'rrykntjptdaxaqqa';
-  //     var message = Message();
-  //     message.subject = 'Verification Code for On Track';
-  //     message.text = 'Your verification code is $code';
-  //     message.from = Address(userEmail);
-  //     message.recipients.add(femail);
-  //     var smtpServer = gmail(userEmail, password);
-  //     final sendReport = await send(message, smtpServer);
-  //     print('Email sent: ' + sendReport.toString());
-  //     return true;
-  //   } on MailerException catch (e) {
-  //     print('Error sending email! $e');
-  //
-  //     for (var p in e.problems) {
-  //       print('Problem: ${p.code}: ${p.msg}');
-  //     }
-  //     return false;
-  //   }
-  // }
-  //
-  Widget _buildGradientText(String text, List<Color> colors) {
-    return ShaderMask(
-      shaderCallback: (Rect bounds) {
-        return LinearGradient(
-          colors: colors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ).createShader(bounds);
+
+  Future<bool> isEmailAlreadyExists(String email) async {
+    // Query the database to check if the email already exists
+    var result = await MongoDatabase.queryEmailExists(email);
+    return result; // Return true if email exists, false otherwise
+  }
+
+  void _startQRScanner() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        _qrDialogContext = context; // Save the dialog context
+        return Dialog(
+          child: Container(
+            height: 300,
+            width: 300,
+            child: Column(
+              children: [
+                const Text(
+                  "Scan Student's QR Code",
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+                Expanded(
+                  child: QRView(
+                    key: qrKey,
+                    onQRViewCreated: _onQRViewCreated,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close the QR scanner dialog
+                  },
+                  child: Text('Cancel'),
+                ),
+              ],
+            ),
+          ),
+        );
       },
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 50,
-          fontFamily: 'FasterOne',
-          color: Colors.white,
-        ),
-      ),
     );
   }
+
+  void _onQRViewCreated(QRViewController controller) {
+    controller.scannedDataStream.listen((scanData) {
+      setState(() async {
+        String? qrCode= scanData.code;
+        List<String>? qrParts = qrCode?.split("|");
+        String? email = qrParts?[0];
+        Navigator.of(_qrDialogContext!).pop();
+        if(await MongoDatabase.queryEmailExists(email!))
+        {
+          String fname=fnameController.text;
+          String fphone=fphoneController.text;
+          String fpassword=fpasswordController.text;
+          String fstdemail=email;
+          _insertData(fname, fphone, fpassword, fstdemail);
+        }
+        else
+        {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Student not found!')));
+        }
+      });
+    });
+  }
+  Future<void> _insertData(String fname, String fphone, String fpassword,
+      String fstdemail) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          Center(
+            child: CircularProgressIndicator(),
+          ),
+    );
+
+    try {
+      final data = GuardianModel(
+        name: fname,
+        phoneNo: fphone,
+        password: fpassword,
+        studentEmail: fstdemail,
+      );
+      Navigator.pushReplacementNamed(context, '/login');
+
+
+    } catch (e) {
+      print('Error inserting data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error during signup. Please try again.'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      Navigator.of(context).pushReplacementNamed('/signup');
+    } finally {
+      Navigator.pop(context); // Dismiss the dialog
+    }
+  }
+}
+
+Widget _buildGradientText(String text, List<Color> colors) {
+  return ShaderMask(
+    shaderCallback: (Rect bounds) {
+      return LinearGradient(
+        colors: colors,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(bounds);
+    },
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 50,
+        fontFamily: 'FasterOne',
+        color: Colors.white,
+      ),
+    ),
+  );
 }

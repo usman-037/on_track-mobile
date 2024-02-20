@@ -453,4 +453,23 @@ return result?["role"];
       modify.set('claimBy', claimer),
     );
   }
+  static Future<String> insertGuardian(GuardianModel data) async {
+    var db = await Db.create(MONGO_CONN_URL);
+    await db.open();
+    var userCollection = db.collection(GUARDIAN_COLLECTION);
+
+    try {
+      var result = await userCollection.insertOne(data.toJson());
+      if (result.isSuccess) {
+        return "Data Inserted";
+      } else {
+        return "Something went wrong";
+      }
+    } catch (e) {
+      print(e.toString());
+      return e.toString();
+    } finally {
+      await db.close();
+    }
+  }
 }
