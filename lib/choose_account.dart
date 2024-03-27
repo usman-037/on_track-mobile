@@ -69,26 +69,42 @@ class _ChooseAccountState extends State<ChooseAccount> {
                     SizedBox(
                       height: 10,
                     ),
-                    DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        hintText: "Select Role",
-                        fillColor: const Color(0xFFE3E2E2),
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
+                DropdownButtonHideUnderline(
+                  child: DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      hintText: "Select Role",
+                      filled: true,
+                      fillColor: const Color(0xFFE3E2E2),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
                       ),
-                      items: role
-                          .map((item) => DropdownMenuItem<String>(
-                                value: item,
-                                child:
-                                    Text(item, style: TextStyle(fontSize: 15)),
-                              ))
-                          .toList(),
-                      onChanged: (item) => setState(() => selectedRole = item),
                     ),
-                    SizedBox(
+                    items: role.map((item) {
+                      return DropdownMenuItem<String>(
+                        value: item,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10.0),
+                          child: Text(
+                            item,
+                            style: TextStyle(fontSize: 16.0),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (item) => setState(() => selectedRole = item),
+                    icon: Icon(Icons.arrow_drop_down_circle_outlined),
+                    iconSize: 36.0,
+                    iconEnabledColor: Colors.grey,
+                    isExpanded: true,
+                    elevation: 8,
+                    dropdownColor: const Color(0xFFE3E2E2),
+                    style: TextStyle(color: Colors.black, fontSize: 16.0),
+                  ),
+                ),
+
+
+                SizedBox(
                       height: 10,
                     ),
                     SizedBox(
