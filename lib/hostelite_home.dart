@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HosteliteHome extends StatefulWidget {
   const HosteliteHome({super.key});
@@ -23,17 +24,22 @@ class _HosteliteHomeState extends State<HosteliteHome> {
         centerTitle: true,
       ),
       drawer: Drawer(
+        width: MediaQuery.of(context).size.width / 1.8,
         backgroundColor: Color(0xFFE3E2E2),
         child: ListView(
           children: [
             ListTile(
-              title: Text('About'),
+              title: Text('About',
+                  style: const TextStyle(
+                      fontSize: 20, fontFamily: 'Lato', height: 3.7)),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
               },
             ),
             ListTile(
-              title: Text('Logout'),
+              title: Text('Logout',
+                  style: const TextStyle(
+                      fontSize: 20, fontFamily: 'Lato', height: -2)),
               onTap: () {
                 showDialog(
                   context: context,
@@ -48,7 +54,10 @@ class _HosteliteHomeState extends State<HosteliteHome> {
                           child: Text('Cancel'),
                         ),
                         TextButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            prefs.setBool('isLoggedIn', false);
                             Navigator.pushNamedAndRemoveUntil(
                                 context, '/login', (route) => false);
                           },
@@ -72,11 +81,11 @@ class _HosteliteHomeState extends State<HosteliteHome> {
         Container(
           alignment: Alignment.topCenter,
           child: Text(
-            'Hi, $userName',
+            'Hi, $userName.',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 25,
-              fontFamily: 'Lato',
+              fontFamily: 'Poppins',
               fontWeight: FontWeight.bold,
               height: 0,
             ),
@@ -94,38 +103,38 @@ class _HosteliteHomeState extends State<HosteliteHome> {
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
-                  fontFamily: 'Dela Gothic One',
+                  fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
                   height: 0,
                 ),
               ),
             )),
         Positioned(
-          bottom: MediaQuery.of(context).size.height / 1.33,
-          right: MediaQuery.of(context).size.width / 100,
-          child: ElevatedButton(
+          bottom: MediaQuery.of(context).size.height / 1.35,
+          right: MediaQuery.of(context).size.width / 50,
+          child: TextButton(
             onPressed: () {
               Navigator.pushNamed(context, '/editProfile', arguments: {
                 'femail': femail,
               });
             },
-            style: ElevatedButton.styleFrom(
+            style: TextButton.styleFrom(
               backgroundColor: Color(0xFF03314B),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
             child: Container(
-              width: MediaQuery.of(context).size.width / 12,
-              height: 75,
+              width: MediaQuery.of(context).size.width / 15,
+              height: 45,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
                     'assets/icons/edit.png',
-                    width: 60,
-                    height: 60,
+                    width: 45,
+                    height: 45,
                   ),
                   // ),
                 ],
@@ -133,77 +142,44 @@ class _HosteliteHomeState extends State<HosteliteHome> {
             ),
           ),
         ),
+
+        // BUTTONS
         Positioned(
-          top: MediaQuery.of(context).size.height / 5,
-          left: MediaQuery.of(context).size.width / 25,
+          top: MediaQuery.of(context).size.height / 5.0,
+          left: MediaQuery.of(context).size.width / 19,
+          right: MediaQuery.of(context).size.width / 19,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/feeslip');
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFE3E2E2),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(40),
               ),
             ),
             child: Container(
               width: MediaQuery.of(context).size.width / 1.25,
-              height: 150,
+              height: 137,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'assets/icons/trackroute.png',
+                    'assets/icons/pass.png',
                     width: 60,
                     height: 60,
                   ),
                   // ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 7),
                   Text(
                     'Acquire Bus Pass',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF1E1E1E),
                       fontSize: 19,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          top: MediaQuery.of(context).size.height / 2.5,
-          left: MediaQuery.of(context).size.width / 25,
-          child: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFE3E2E2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Container(
-              width: MediaQuery.of(context).size.width / 1.25,
-              height: 150,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/icons/fee.png',
-                    width: 60,
-                    height: 60,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Fee Status',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFF1E1E1E),
-                      fontSize: 19,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
+                      fontFamily: 'Lato',
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
