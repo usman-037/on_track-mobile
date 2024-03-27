@@ -19,7 +19,17 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-
+  location: ^5.0.0
+  flutter_polyline_points: ^1.0.0
+  google_maps_flutter: ^2.6.0
+  http: ^0.13.0
+  google_maps_webservice: ^0.0.19
+  geolocator: ^11.0.0
+  fluttertoast: ^8.2.4
+  path_provider: ^2.1.2
+  url_launcher: ^6.2.5
+  image_gallery_saver: ^2.0.3
+  shared_preferences: ^2.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -38,10 +48,28 @@ flutter:
     - assets/icons/fee.png
     - assets/icons/edit.png
     - assets/icons/qrcode.png
-    - assets/icons/routechange.png
     - assets/icons/report.png
+    - assets/icons/buspin.png
+    - assets/icons/pinloc.png
+    - assets/icons/bus.png
+    - assets/icons/language.png
+    - assets/icons/routechange.png
+    - assets/icons/pass.png
+    - assets/icons/receipt.png
+    - assets/icons/busstop.png.
 
   fonts:
     - family: FasterOne
       fonts:
         - asset: assets/fonts/FasterOne-Regular.ttf
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/Lato.ttf
+        - asset: assets/fonts/LatoBold.ttf
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans.ttf
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins.ttf
+        - asset: assets/fonts/PoppinsBold.ttf

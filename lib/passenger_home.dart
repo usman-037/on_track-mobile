@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:ontrack/dbHelper/constant.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PassengerHome extends StatefulWidget {
   const PassengerHome({super.key});
@@ -18,11 +24,47 @@ class _PassengerHomeState extends State<PassengerHome> {
         as Map<String, dynamic>)['femail'];
     final routeNo = (ModalRoute.of(context)!.settings.arguments
         as Map<String, dynamic>)['routeNo'] as int;
+
     late int route;
     late String stop;
     late int requestedroute;
     late String requestedstop;
     late String status;
+    List<String> routestop = [];
+    List<LatLng> latLngList = [];
+
+    Future<void> fetchRouteStops() async {
+      List<String> result = await MongoDatabase.queryFetchStops(routeNo);
+
+      setState(() {
+        routestop = List.from(result);
+      });
+    }
+
+    Future<void> getLatLngList() async {
+      for (String stopName in routestop) {
+        String url =
+            'https://maps.googleapis.com/maps/api/geocode/json?address=$stopName&key=$google_api_key';
+
+        final response = await http.get(Uri.parse(url));
+
+        if (response.statusCode == 200) {
+          Map<String, dynamic> data = json.decode(response.body);
+          if (data['status'] == 'OK') {
+            double latitude = data['results'][0]['geometry']['location']['lat'];
+            double longitude =
+                data['results'][0]['geometry']['location']['lng'];
+            LatLng latLng = LatLng(latitude, longitude);
+            latLngList.add(latLng);
+          } else {
+            print('Coordinates not found for $stopName');
+          }
+        } else {
+          throw Exception('Failed to load coordinates');
+        }
+      }
+    }
+
     return Scaffold(
       backgroundColor: Color(0xFFF8F8F8),
       appBar: AppBar(
@@ -55,7 +97,10 @@ class _PassengerHomeState extends State<PassengerHome> {
                           child: Text('Cancel'),
                         ),
                         TextButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            prefs.setBool('isLoggedIn', false);
                             Navigator.pushNamedAndRemoveUntil(
                                 context, '/login', (route) => false);
                           },
@@ -144,7 +189,13 @@ class _PassengerHomeState extends State<PassengerHome> {
           top: MediaQuery.of(context).size.height / 5,
           left: MediaQuery.of(context).size.width / 25,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () async {
+              fetchRouteStops().then((_) async {
+                await getLatLngList();
+              });
+              Navigator.pushNamed(context, '/trackroute',
+                  arguments: {'latlngList': latLngList, 'routeNo': routeNo});
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFE3E2E2),
               shape: RoundedRectangleBorder(
@@ -274,6 +325,7 @@ class _PassengerHomeState extends State<PassengerHome> {
         ),
 
         // Button 3
+        // Button 3
         Positioned(
           top: MediaQuery.of(context).size.height / 2.4,
           left: MediaQuery.of(context).size.width / 1.5,
@@ -291,30 +343,37 @@ class _PassengerHomeState extends State<PassengerHome> {
                 route = result['route'];
                 stop = result['stop'];
               }
-              var resultstatus = await MongoDatabase.getstatus(femail);
-              if (resultstatus != null) {
-                requestedroute = resultstatus['route'];
-                requestedstop = resultstatus['busstop'];
-                status = resultstatus['status'];
-                print(requestedstop);
-                print(requestedroute);
-                print(status);
-              } else {
-                requestedroute = 0;
-                requestedstop = 'null';
-                status = 'null';
-              }
-              var check = await MongoDatabase.checkroutedata(femail);
-              print(check);
+              var requestedroute=0;
+              String requestedstop="";
+              String status="";
+
+              MongoDatabase.getstatus(femail).then((resultstatus) {
+                print(resultstatus);
+                print("checking");
+                if (resultstatus != null) {
+                   requestedroute = resultstatus['requestedroute'];
+                   requestedstop = resultstatus['requestedstop'];
+                   status = resultstatus['status'];
+                  print(requestedstop);
+                  print(requestedroute);
+                  print(status);
+                }
+              }).catchError((error) {
+
+                print("Error occurred: $error");
+              });
+
+              bool check = await MongoDatabase.checkroutedata(femail);
+              //print(check);
               Navigator.pop(context);
               Navigator.pushNamed(context, '/requestscreen', arguments: {
                 'femail': femail,
                 'route': route,
                 'stop': stop,
-                'check': check,
                 'requestedroute': requestedroute,
                 'requestedstop': requestedstop,
-                'status': status
+                'status': status,
+                'check': check
               });
             },
             style: ElevatedButton.styleFrom(
@@ -353,12 +412,48 @@ class _PassengerHomeState extends State<PassengerHome> {
             ),
           ),
         ),
-
         Positioned(
           top: MediaQuery.of(context).size.height / 1.58,
           left: MediaQuery.of(context).size.width / 25,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () async {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+
+              // Fetch fee status
+              var feeStatus = await fetchfeestatus(femail);
+              Navigator.pop(context); // Close loading dialog
+
+              if (feeStatus == 'Paid' || feeStatus == 'paid') {
+                // If fee status is paid, show dialog indicating payment status
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Fee Status'),
+                      content: Text('You have already paid the fees.'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Close the dialog
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                // If fee status is not paid, navigate to fee status screen
+                Navigator.pushNamed(context, '/transportfees',
+                    arguments: {'femail': femail});
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFE3E2E2),
               shape: RoundedRectangleBorder(
@@ -378,7 +473,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    'Fee Status',
+                    'Pay Fees',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF1E1E1E),
@@ -439,6 +534,11 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   Future<bool> checkrequest(String femail) async {
     var result = await MongoDatabase.checkrouterequest(femail);
+    return result;
+  }
+
+  Future<String?> fetchfeestatus(String femail) async {
+    var result = await MongoDatabase.fetchFeeStatus(femail);
     return result;
   }
 }
