@@ -4,7 +4,6 @@ import 'package:ontrack/MongoDBModel.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
 import 'package:mongo_dart/mongo_dart.dart' as M;
 
-
 class RequestRouteChange extends StatefulWidget {
   const RequestRouteChange({Key? key}) : super(key: key);
 
@@ -17,7 +16,8 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
   List<String> routestop = [];
   int? selectedRoute;
   String? selectedStops;
-  TextEditingController commentController = new TextEditingController(); // Add comment controller
+  TextEditingController commentController =
+      new TextEditingController(); // Add comment controller
   late String femail;
   late int currentroute;
   late String currentstop;
@@ -25,7 +25,6 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
   void initState() {
     super.initState();
     fetchData(); // Assuming fetchData is an asynchronous function
-
   }
 
   Future<void> fetchData() async {
@@ -37,10 +36,12 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    Map<String, dynamic> arguments =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     femail = arguments['femail'];
-    currentroute=arguments['currentroute'];
-    currentstop=arguments['currentstop'];
+    currentroute = arguments['currentroute'];
+    currentstop = arguments['currentstop'];
+
     return Scaffold(
       backgroundColor: Color(0xFFF8F8F8),
       appBar: AppBar(
@@ -68,28 +69,31 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
             DropdownButtonFormField<int>(
               decoration: InputDecoration(
                 hintText: "Select Route",
-                  fillColor: const Color(0xFFE3E2E2),
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
+                fillColor: const Color(0xFFE3E2E2),
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
               ),
               value: selectedRoute,
-              items: routes.map((item) => DropdownMenuItem<int>(
-                value: item,
-                child: Text(item.toString(), style: TextStyle(fontSize: 15)),
-              )).toList(),
+              items: routes
+                  .map((item) => DropdownMenuItem<int>(
+                        value: item,
+                        child: Text(item.toString(),
+                            style: TextStyle(fontSize: 15)),
+                      ))
+                  .toList(),
               onChanged: (item) {
                 setState(() {
                   selectedRoute = item;
-                  selectedStops = null; // Reset selected stops when route changes
+                  selectedStops =
+                      null; // Reset selected stops when route changes
                   routestop.clear(); // Clear the routestop list
                 });
                 fetchRouteStops(selectedRoute!);
               },
             ),
-
             SizedBox(height: 20),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
@@ -102,10 +106,12 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
                 ),
               ),
               value: selectedStops,
-              items: routestop.map((item) => DropdownMenuItem<String>(
-                value: item,
-                child: Text(item, style: TextStyle(fontSize: 15)),
-              )).toList(),
+              items: routestop
+                  .map((item) => DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(item, style: TextStyle(fontSize: 15)),
+                      ))
+                  .toList(),
               onChanged: (item) {
                 setState(() {
                   selectedStops = item;
@@ -132,32 +138,31 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                if (
-                selectedRoute == null ||
-                 selectedStops == null || commentController.text.isEmpty ){
-                  ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                  content: Text('Please fill in all the fields')),
-                          );
-                          } else {
-                  _insertData(
-                    currentroute,
-                    currentstop,
-                    selectedRoute!,
-                    selectedStops!,
-                    commentController.text,
-                  );
-                }
-
+                  if (selectedRoute == null ||
+                      selectedStops == null ||
+                      commentController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Please fill in all the fields')),
+                    );
+                  } else {
+                    _insertData(
+                      currentroute,
+                      currentstop,
+                      selectedRoute!,
+                      selectedStops!,
+                      commentController.text,
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF03314B),
+                  backgroundColor: Color(0xFF03314B),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   child: Text(
                     'Confirm',
                     style: TextStyle(
@@ -197,19 +202,18 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
     Navigator.pop(context);
   }
 
-  Future<void> _insertData(int fcurrentroute,String fcurrentstop,int frequestedroute,String frequestedstop,String fcomments) async {
+  Future<void> _insertData(int fcurrentroute, String fcurrentstop,
+      int frequestedroute, String frequestedstop, String fcomments) async {
     DateTime currentDate = DateTime.now();
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) =>
-          Center(
-            child: CircularProgressIndicator(),
-          ),
+      builder: (context) => Center(
+        child: CircularProgressIndicator(),
+      ),
     );
-    bool request=await checkrequest(femail);
-    if (!request)
-    {
+    bool request = await checkrequest(femail);
+    if (!request) {
       var _id = M.ObjectId();
       final data = routerequestModel(
           id: _id,
@@ -220,7 +224,7 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
           requestedstop: frequestedstop,
           status: "Unfulfilled",
           comments: fcomments,
-          dateTime:currentDate);
+          dateTime: currentDate);
       await MongoDatabase.insertRequest(data);
       setState(() {
         selectedRoute = null;
@@ -235,8 +239,7 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
         ),
       );
       Navigator.pushNamed(context, '/passengerhome');
-    }
-    else{
+    } else {
       setState(() {
         selectedRoute = null;
         selectedStops = null;
@@ -252,13 +255,9 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
       Navigator.pop(context);
     }
   }
- Future<bool> checkrequest(String femail) async{
+
+  Future<bool> checkrequest(String femail) async {
     var result = await MongoDatabase.checkrouterequest(femail);
     return result;
-
   }
-    }
-
-
-
-
+}
