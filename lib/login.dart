@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ontrack/choose_account.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
 import 'package:ontrack/getEmail.dart';
-import 'package:ontrack/signup.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -15,6 +15,45 @@ class _LoginState extends State<Login> {
   static final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _showPassword = false;
+  bool _stayLoggedIn = false;
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    if (isLoggedIn) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? storedEmail = prefs.getString('email');
+      String? storedPassword = prefs.getString('password');
+      String? storedaccountType = prefs.getString('accountType');
+      String? storeduserName = prefs.getString('userName');
+      print(storeduserName);
+      print(storedaccountType);
+      int? storedrouteNo = prefs.getInt('routeNo');
+
+      if (storedEmail != null &&
+          storedPassword != null &&
+          storedaccountType != null &&
+          storeduserName != null &&
+          storedrouteNo != null) {
+        _navigateToHome(storedEmail, storedPassword, storedaccountType,
+            storeduserName, storedrouteNo);
+      } else {
+        print("values are null");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -112,7 +151,21 @@ class _LoginState extends State<Login> {
                               ),
                             ),
                             const SizedBox(
-                              height: 20,
+                              height: 3,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Checkbox(
+                                  value: _stayLoggedIn,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _stayLoggedIn = value!;
+                                    });
+                                  },
+                                ),
+                                Text('Stay Logged In'),
+                              ],
                             ),
                             ElevatedButton(
                               onPressed: () {
@@ -249,43 +302,37 @@ class _LoginState extends State<Login> {
         child: CircularProgressIndicator(),
       ),
     );
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('email', emailController.text);
+    prefs.setString('password', passwordController.text);
     String femail = emailController.text;
     String fpassword = passwordController.text;
+
     if (await isEmailandPasswordAlreadyExists(femail, fpassword)) {
       String userName = await getUserName(femail);
-      int routeNo = await getRouteNo(femail);
+      int routeNo = 0;
       String accountType = await MongoDatabase.fetchAccountType(femail);
-      if (accountType == "Hostelite") {
-        Navigator.pop(context); // Dismiss the dialog
-        Navigator.pushReplacementNamed(context, '/hosteliteHome', arguments: {
-          'userName': userName,
-          'femail': femail,
-          'routeNo': routeNo
-        });
-      }
-      else if(accountType=="Guardian"){
-        Navigator.pop(context); // Dismiss the dialog
-        Navigator.pushReplacementNamed(context, '/GuardianHome', arguments: {
-          'userName': userName,
-          'femail': femail,
-          'routeNo': routeNo
-        });
-      }
-      else if (accountType == "Student" || accountType=="Faculty") {
-        Navigator.pop(context); // Dismiss the dialog
-        Navigator.pushReplacementNamed(context, '/passengerHome', arguments: {
-          'userName': userName,
-          'femail': femail,
-          'routeNo': routeNo
-        });
+
+      if (accountType != "Guardian") {
+        routeNo = await getRouteNo(femail);
       } else {
-        Navigator.pop(context); // Dismiss the dialog
-        emailController.clear();
-        passwordController.clear();
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Invalid email or password')));
+        String stdEmail = await getStdEmail(femail);
+        routeNo = await getRouteNo(stdEmail);
       }
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('accountType', accountType);
+      prefs.setString('userName', userName);
+      prefs.setInt('routeNo', routeNo);
+      prefs.setBool('isLoggedIn', _stayLoggedIn);
+      await _navigateToHome(femail, fpassword, accountType, userName, routeNo);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Incorrect Email and Password.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      Navigator.pop(context);
     }
   }
 
@@ -299,6 +346,11 @@ class _LoginState extends State<Login> {
     return result;
   }
 
+  Future<String> getStdEmail(String femail) async {
+    String result = (await MongoDatabase.querygetStdemail(femail));
+    return result;
+  }
+
   Future<bool> isEmailandPasswordAlreadyExists(
       String femail, String fpassword) async {
     var result =
@@ -306,23 +358,80 @@ class _LoginState extends State<Login> {
     return result;
   }
 
-  Widget _buildGradientText(String text, List<Color> colors) {
-    return ShaderMask(
-      shaderCallback: (Rect bounds) {
-        return LinearGradient(
-          colors: colors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ).createShader(bounds);
-      },
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 50,
-          fontFamily: 'FasterOne',
-          color: Colors.white,
-        ),
-      ),
-    );
+  Future<void> _navigateToHome(String femail, String fpassword,
+      String accountType, String userName, int routeNo) async {
+    // Fetch account type based on user data
+
+    switch (accountType) {
+      case 'Guardian':
+        Navigator.pushReplacementNamed(context, '/guardianHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+
+        break;
+      case 'Driver':
+        Navigator.pushReplacementNamed(context, '/driverHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+        break;
+
+      case 'Student':
+        Navigator.pushReplacementNamed(context, '/passengerHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+      case 'Faculty':
+        Navigator.pushReplacementNamed(context, '/passengerHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+        break;
+      case 'Supervisor':
+        Navigator.pushReplacementNamed(context, '/supervisorHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+      case 'Hostelite':
+        Navigator.pushReplacementNamed(context, '/hosteliteHome', arguments: {
+          'userName': userName,
+          'femail': femail,
+          'routeNo': routeNo
+        });
+        break;
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Incorrect Email and Password.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+    }
   }
+}
+
+Widget _buildGradientText(String text, List<Color> colors) {
+  return ShaderMask(
+    shaderCallback: (Rect bounds) {
+      return LinearGradient(
+        colors: colors,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(bounds);
+    },
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 50,
+        fontFamily: 'FasterOne',
+        color: Colors.white,
+      ),
+    ),
+  );
 }
