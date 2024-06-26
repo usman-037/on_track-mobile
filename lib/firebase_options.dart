@@ -50,16 +50,16 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB-_WPH-cRRjXI_pGme_lORtNjBWYJ0C2M',
-    appId: '1:971615430003:android:c7f560474894f3358b9106',
+    apiKey: 'YOUR FIREBASE API HERE',
+    appId: 'YOUR APP ID HERE',
     messagingSenderId: '971615430003',
     projectId: 'ontrack-33401',
     storageBucket: 'ontrack-33401.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBxiBeJbStUR1N13tE1zzjJ611kDIGC8vw',
-    appId: '1:971615430003:ios:59e254b284147e188b9106',
+    apiKey: 'YOUR FIREBASE API HERE',
+    appId: 'YOUR APP ID HERE',
     messagingSenderId: '971615430003',
     projectId: 'ontrack-33401',
     storageBucket: 'ontrack-33401.appspot.com',
