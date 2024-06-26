@@ -60,53 +60,7 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
         .format(DateTime.now().add(const Duration(days: 1)));
     tre = "T$dateAndTime";
 
-    ppAmount = "30000";
-    ppBillReference = "billRef";
-    ppDescription = "Description for transaction";
-    ppLanguage = "EN";
-    ppMerchantID = "MC83924";
-    ppPassword = "y40ytt9u62";
-    ppReturnURL =
-    "https://sandbox.jazzcash.com.pk/ApplicationAPI/API/Payment/DoTransaction";
-    ppVer = "1.1";
-    ppTxnCurrency = "PKR";
-    ppTxnDateTime = dateAndTime;
-    ppTxnExpiryDateTime = dExpireDate;
-    ppTxnRefNo = tre;
-    ppTxnType = "MWALLET";
-    ppmpf1 = "4456733833993";
-    integritySalt = "531d1z69at";
-    and = '&';
-    superData = integritySalt +
-        and +
-        ppAmount +
-        and +
-        ppBillReference +
-        and +
-        ppDescription +
-        and +
-        ppLanguage +
-        and +
-        ppMerchantID +
-        and +
-        ppPassword +
-        and +
-        ppReturnURL +
-        and +
-        ppTxnCurrency +
-        and +
-        ppTxnDateTime +
-        and +
-        ppTxnExpiryDateTime +
-        and +
-        ppTxnRefNo +
-        and +
-        ppTxnType +
-        and +
-        ppVer +
-        and +
-        ppmpf1;
-    selectedDate = DateTime.now().add(Duration(days: 1));
+  //Your dummy transaction data here
 
   }
 
