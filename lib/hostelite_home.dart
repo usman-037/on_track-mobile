@@ -28,14 +28,7 @@ class _HosteliteHomeState extends State<HosteliteHome> {
         backgroundColor: Color(0xFFE3E2E2),
         child: ListView(
           children: [
-            ListTile(
-              title: Text('About',
-                  style: const TextStyle(
-                      fontSize: 20, fontFamily: 'Lato', height: 3.7)),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-              },
-            ),
+
             ListTile(
               title: Text('Logout',
                   style: const TextStyle(
@@ -150,7 +143,7 @@ class _HosteliteHomeState extends State<HosteliteHome> {
           right: MediaQuery.of(context).size.width / 19,
           child: ElevatedButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/feeslip');
+              Navigator.pushNamed(context, '/feeslip',arguments: {'userName': userName, 'femail': femail});
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFE3E2E2),

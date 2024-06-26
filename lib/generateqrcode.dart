@@ -20,6 +20,7 @@ class _GetQrCodeState extends State<GetQrCode> {
     Map<String, dynamic> arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     userName = arguments['userName'];
     femail = arguments['femail'];
+    _generateqrcode();
 
     return Scaffold(
       backgroundColor: Color(0xFFF8F8F8),
@@ -61,44 +62,34 @@ class _GetQrCodeState extends State<GetQrCode> {
               ),
             ),
             SizedBox(height: 20),
+
+
             if (qrcodedata.isNotEmpty)
               Container(
-                width: 281,
-                height: 281,
-                child: QrImageView(
-                  data: qrcodedata,
-                  version: QrVersions.auto,
-                  size: 200.0, // Adjust the size as needed
-                ),
-              ),
-            SizedBox(height: 20.0),
-            Container(
-              width: 281,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  _generateqrcode();
-                },
-                style: ElevatedButton.styleFrom(
-                  primary: Color(0xFF03314B),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                  child: Text(
-                    'Generate',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w700,
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blueAccent.withOpacity(0.5), // shadow color
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(3, 6), // changes position of shadow
                     ),
+                  ],
+                  color: Colors.white,
+                ),
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: QrImageView(
+                    data: qrcodedata,
+                    version: QrVersions.auto,
+                    size: 250.0,
                   ),
                 ),
               ),
-            ),
+
 
           ],
         ),

@@ -19,7 +19,7 @@ class _BusesRoutesState extends State<BusesRoutes> {
           'Buses Routes',
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-             color: Colors.white,
+            color: Colors.white,
             fontSize: 18,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w400,
@@ -44,7 +44,11 @@ class _BusesRoutesState extends State<BusesRoutes> {
                   },
                   decoration: const InputDecoration(
                     labelText: 'Search your stop',
-                    labelStyle: TextStyle(color: Colors.black87, fontSize: 15, fontFamily: 'Poppins',),
+                    labelStyle: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 15,
+                      fontFamily: 'Poppins',
+                    ),
                     prefixIcon: Icon(Icons.search),
                     border: OutlineInputBorder(),
                   ),
@@ -61,13 +65,8 @@ class _BusesRoutesState extends State<BusesRoutes> {
 
   Widget _buildRoutes() {
     return FutureBuilder(
-      future: Future.wait(List.generate(13, (index) =>
-          Future.wait([
-            MongoDatabase.queryFetchStops(index + 1),
-            MongoDatabase.queryFetchArrivalTimes(index + 1),
-          ])
-      )),
-      builder: (context, AsyncSnapshot<List<List<List<String>>>> snapshot) {
+      future: MongoDatabase.queryFetchAllRoutes(), // Assuming you have a function to fetch all routes
+      builder: (context, AsyncSnapshot<Map<int, List<String>>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
             child: CircularProgressIndicator(),
@@ -76,17 +75,27 @@ class _BusesRoutesState extends State<BusesRoutes> {
           return Center(
             child: Text('Error: ${snapshot.error}'),
           );
-        } else {
+        } else if (snapshot.hasData) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: List.generate(13, (index) => _buildRouteSection(index + 1, 'Route ${index + 1}', snapshot.data![index][0], snapshot.data![index][1])),
+            children: snapshot.data!.entries.map((entry) {
+              int routeNumber = entry.key;
+              List<String> stops = entry.value;
+
+              return _buildRouteSection(routeNumber, 'Route $routeNumber', stops);
+            }).toList(),
+          );
+        } else {
+          return Center(
+            child: Text('No data available'),
           );
         }
       },
     );
   }
 
-  Widget _buildRouteSection(int routeNumber, String routeTitle, List<String> stops, List<String> arrivalTimes) {
+  Widget _buildRouteSection(
+      int routeNumber, String routeTitle, List<String> stops) {
     // Filter stops based on search query
     if (_searchQuery.isNotEmpty) {
       var searchWords = _searchQuery.toLowerCase().split(' ');
@@ -134,16 +143,6 @@ class _BusesRoutesState extends State<BusesRoutes> {
                     ),
                   ),
                 ),
-                DataColumn(
-                  label: Text(
-                    'Arrival Times',
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 15,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ),
               ],
               rows: List<DataRow>.generate(
                 stops.length,
@@ -151,28 +150,17 @@ class _BusesRoutesState extends State<BusesRoutes> {
                   cells: [
                     DataCell(
                       Container(
-                        width: 180,
+                        width: 350,
                         child: Text(
                           stops[index],
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: TextStyle(
                             color: Color(0xFF1E1E1E),
-                            fontSize: 13,
+                            fontSize: 14,
                             fontFamily: 'Lato',
                             fontWeight: FontWeight.normal,
                           ),
-                        ),
-                      ),
-                    ),
-                    DataCell(
-                      Text(
-                        arrivalTimes.length > index ? '${arrivalTimes[index]} AM' : 'N/A',
-                        style: TextStyle(
-                          color: Color(0xFF1E1E1E),
-                          fontSize: 13,
-                          fontFamily: 'Lato',
-                          fontWeight: FontWeight.normal,
                         ),
                       ),
                     ),
@@ -187,5 +175,4 @@ class _BusesRoutesState extends State<BusesRoutes> {
       return Container(); // Return an empty container if there are no matching stops
     }
   }
-
 }

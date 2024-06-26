@@ -1,9 +1,7 @@
 import 'dart:convert';
 
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-
-
-
 
 MongoDbModel mongoDbModelFromJson(String str) =>
     MongoDbModel.fromJson(json.decode(str));
@@ -18,6 +16,11 @@ class MongoDbModel {
   String role;
   int route;
   String stop;
+  double stoplat;
+  double stoplng;
+  String? fcmtoken;
+  String feestatus;
+
   MongoDbModel({
     required this.id,
     required this.name,
@@ -26,17 +29,24 @@ class MongoDbModel {
     required this.role,
     required this.route,
     required this.stop,
+    required this.stoplat,
+    required this.stoplng,
+    required this.fcmtoken,
+    required this.feestatus,
   });
 
   factory MongoDbModel.fromJson(Map<String, dynamic> json) => MongoDbModel(
-        id: json["_id"],
-        name: json["name"],
-        email: json["email"],
-        password: json["password"],
-        role: json["role"],
-        route: json["route"],
-        stop: json["stop"],
-      );
+      id: json["_id"],
+      name: json["name"],
+      email: json["email"],
+      password: json["password"],
+      role: json["role"],
+      route: json["route"],
+      stop: json["stop"],
+      stoplat: json["stoplat"],
+      stoplng: json["stoplng"],
+      fcmtoken: json["fcmtoken"],
+      feestatus: json["feestatus"]);
 
   Map<String, dynamic> toJson() => {
         "_id": id,
@@ -46,6 +56,10 @@ class MongoDbModel {
         "role": role,
         "route": route,
         "stop": stop,
+        "stoplat": stoplat,
+        "stoplng": stoplng,
+        "fcmtoken": fcmtoken,
+        "feestatus": feestatus,
       };
 }
 
@@ -145,10 +159,9 @@ class routerequestModel {
 
 ReportAndClaimItemModel ReportAndClaimItemModelFromJson(String str) =>
     ReportAndClaimItemModel.fromJson(json.decode(str));
+
 String ReportAndClaimItemModelToJson(routerequestModel data) =>
     json.encode(data.toJson());
-
-
 
 class ReportAndClaimItemModel {
   Object id;
@@ -157,6 +170,7 @@ class ReportAndClaimItemModel {
   String details;
   String base64string;
   String itemstatus;
+
   ReportAndClaimItemModel({
     required this.id,
     required this.itemname,
@@ -177,16 +191,17 @@ class ReportAndClaimItemModel {
       );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    "itemname": itemname,
-    "routeno": routeno,
-    "details": details,
-    "base64string": base64string,
-    "itemstatus":itemstatus,
-  };
+        'id': id,
+        "itemname": itemname,
+        "routeno": routeno,
+        "details": details,
+        "base64string": base64string,
+        "itemstatus": itemstatus,
+      };
 }
+
 class GuardianModel {
-  String name,email,password,studentEmail;
+  String name, email, password, studentEmail;
 
   GuardianModel({
     required this.name,
@@ -195,8 +210,7 @@ class GuardianModel {
     required this.studentEmail,
   });
 
-  factory GuardianModel.fromJson(Map<String, dynamic> json) =>
-      GuardianModel(
+  factory GuardianModel.fromJson(Map<String, dynamic> json) => GuardianModel(
         name: json["name"],
         email: json["phoneNo"],
         password: json["password"],
@@ -204,23 +218,21 @@ class GuardianModel {
       );
 
   Map<String, dynamic> toJson() => {
-    "name": name,
-    "email": email,
-    "password": password,
-    "role":"Guardian",
-    "studentEmail": studentEmail,
-  };
+        "name": name,
+        "email": email,
+        "password": password,
+        "role": "Guardian",
+        "studentEmail": studentEmail,
+      };
 }
 class PaymentDetails {
-  String name,rollno,section,transactionid;
-  int routeno;
+  String name,femail,transactionid;
+
   DateTime transactiondate,traveldate;
 
   PaymentDetails({
     required this.name,
-    required this.rollno,
-    required this.section,
-    required this.routeno,
+    required this.femail,
     required this.transactionid,
     required this.transactiondate,
     required this.traveldate,
@@ -229,9 +241,7 @@ class PaymentDetails {
   factory PaymentDetails.fromJson(Map<String, dynamic> json) =>
       PaymentDetails(
         name: json["name"],
-        rollno: json["rollno"],
-        section: json["section"],
-        routeno: json["routeno"],
+        femail:json["femail"],
         transactionid: json["transactionid"],
         transactiondate: json["transactiondate"],
         traveldate:json["traveldate"],
@@ -239,23 +249,20 @@ class PaymentDetails {
 
   Map<String, dynamic> toJson() => {
     "name": name,
-    "rollno": rollno,
-    "section": section,
-    "routeno": routeno,
+    "femail":femail,
     "transactionid":transactionid,
     "transactiondate":transactiondate,
     "traveldate":traveldate,
   };
 }
 class TransportFeeDetails {
-  String name,rollno,section,transactionid;
+  String name,femail,transactionid;
   int routeno;
   DateTime transactiondate;
 
   TransportFeeDetails({
     required this.name,
-    required this.rollno,
-    required this.section,
+    required this.femail,
     required this.transactionid,
     required this.routeno,
     required this.transactiondate,
@@ -265,8 +272,7 @@ class TransportFeeDetails {
   factory TransportFeeDetails.fromJson(Map<String, dynamic> json) =>
       TransportFeeDetails(
         name: json["name"],
-        rollno: json["rollno"],
-        section: json["section"],
+        femail: json["femail"],
         transactionid: json["transactionid"],
         routeno: json["routeno"],
         transactiondate: json["transactiondate"],
@@ -274,14 +280,12 @@ class TransportFeeDetails {
 
   Map<String, dynamic> toJson() => {
     "name": name,
-    "rollno": rollno,
-    "section": section,
+    "femail":femail,
     "transactionid":transactionid,
     "routeno":routeno,
     "transactiondate":transactiondate,
 
   };
-
 }
 class Attendance {
   String femail, userName, attendanceStatus, date;
@@ -293,11 +297,9 @@ class Attendance {
     required this.routeNo,
     required this.attendanceStatus,
     required this.date,
-
   });
 
-  factory Attendance.fromJson(Map<String, dynamic> json) =>
-      Attendance(
+  factory Attendance.fromJson(Map<String, dynamic> json) => Attendance(
         femail: json["femail"],
         userName: json["userName"],
         routeNo: json["routeNo"],
@@ -305,8 +307,7 @@ class Attendance {
         date: json["date"],
       );
 
-  Map<String, dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         "femail": femail,
         "userName": userName,
         "routeNo": routeNo,
@@ -314,6 +315,7 @@ class Attendance {
         "date": date,
       };
 }
+
 class ClaimItemModel {
   ObjectId itemid;
   String itemname;
@@ -332,20 +334,20 @@ class ClaimItemModel {
   });
 
   factory ClaimItemModel.fromJson(Map<String, dynamic> json) => ClaimItemModel(
-    itemid: json['itemid'],
-    itemname: json["itemname"],
-    routeno: json["routeno"],
-    details: json["details"],
-    base64string: json["base64string"],
-    claimby: json["claimby"],
-  );
+        itemid: json['itemid'],
+        itemname: json["itemname"],
+        routeno: json["routeno"],
+        details: json["details"],
+        base64string: json["base64string"],
+        claimby: json["claimby"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "itemid": itemid, // Convert ObjectId to String
-    "itemname": itemname,
-    "routeno": routeno,
-    "details": details,
-    "base64string": base64string,
-    "claimby": claimby,
-  };
+        "itemid": itemid, // Convert ObjectId to String
+        "itemname": itemname,
+        "routeno": routeno,
+        "details": details,
+        "base64string": base64string,
+        "claimby": claimby,
+      };
 }

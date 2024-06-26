@@ -16,6 +16,8 @@ class SupervisorHome extends StatefulWidget {
 }
 
 class _SupervisorHomeState extends State<SupervisorHome> {
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     final userName = (ModalRoute.of(context)!.settings.arguments
@@ -25,48 +27,13 @@ class _SupervisorHomeState extends State<SupervisorHome> {
     final routeNo = (ModalRoute.of(context)!.settings.arguments
         as Map<String, dynamic>)['routeNo'] as int;
 
-    late String location = ""; //current driver location from google maps
 
-    late int route;
-    late int stop;
-    late String status;
-    late int requestedroute;
-    late String requestedstop;
-    List<String> routestop = [];
-    List<LatLng> latLngList = [];
-    Future<void> fetchRouteStops() async {
-      List<String> result = await MongoDatabase.queryFetchStops(routeNo);
 
-      setState(() {
-        routestop = List.from(result);
-      });
-    }
 
-    Future<void> getLatLngList() async {
-      for (String stopName in routestop) {
-        String url =
-            'https://maps.googleapis.com/maps/api/geocode/json?address=$stopName&key=$google_api_key';
 
-        final response = await http.get(Uri.parse(url));
-
-        if (response.statusCode == 200) {
-          Map<String, dynamic> data = json.decode(response.body);
-          if (data['status'] == 'OK') {
-            double latitude = data['results'][0]['geometry']['location']['lat'];
-            double longitude =
-                data['results'][0]['geometry']['location']['lng'];
-            LatLng latLng = LatLng(latitude, longitude);
-            latLngList.add(latLng);
-          } else {
-            print('Coordinates not found for $stopName');
-          }
-        } else {
-          throw Exception('Failed to load coordinates');
-        }
-      }
-    }
-
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async => false, // Disable back button
+    child: Scaffold(
       backgroundColor: Color(0xFFF8F8F8),
       appBar: AppBar(
         backgroundColor: Color(0xFF03314B),
@@ -163,11 +130,28 @@ class _SupervisorHomeState extends State<SupervisorHome> {
             left: MediaQuery.of(context).size.width / 25,
             child: ElevatedButton(
               onPressed: () async {
-                fetchRouteStops().then((_) async {
-                  await getLatLngList();
+                setState(() {
+                  _isLoading = true;
                 });
+                if (_isLoading == true) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+                LatLng stopCoords = await MongoDatabase.getCoords(femail);
+
+                setState(() {
+                  _isLoading = false;
+                });
+                if (_isLoading == false) {
+                  Navigator.pop(context);
+                }
                 Navigator.pushNamed(context, '/trackroute',
-                    arguments: {'latlngList': latLngList, 'routeNo': routeNo});
+                    arguments: {'stopCoords': stopCoords, 'routeNo': routeNo});
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFE3E2E2),
@@ -340,6 +324,6 @@ class _SupervisorHomeState extends State<SupervisorHome> {
           ),
         ],
       ),
-    );
+    ));
   }
 }

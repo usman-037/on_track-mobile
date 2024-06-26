@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:ontrack/busesroutes.dart';
 import 'package:ontrack/change_password.dart';
@@ -28,40 +30,75 @@ import 'package:ontrack/requestbusswitching.dart';
 import 'package:ontrack/guardian_home.dart';
 import 'package:ontrack/viewroutestops.dart';
 
+import 'firebase_options.dart';
+import 'firebasemessaging.dart';
+import 'localnotification.dart';
+
+
+
 void main() async {
+
+
   WidgetsFlutterBinding.ensureInitialized();
   await MongoDatabase.connect();
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    initialRoute: '/splash',
-    routes: {
-      '/login': (context) => const Login(),
-      '/signup': (context) => const Mysignup(),
-      '/passengerHome': (context) => const PassengerHome(),
-      '/generateqrcode': (context) => const GetQrCode(),
-      '/splash': (context) => const Splash(),
-      '/verifyEmail': (context) => const VerifyEmail(),
-      '/editProfile': (context) => const EditProfile(),
-      '/requestroutechange': (context) => const RequestRouteChange(),
-      '/requestscreen': (context) => const RequestScreen(),
-      '/reportanissue': (context) => const Reportanissue(),
-      '/getEmail': (context) => const GetEmail(),
-      '/verifyEmailForPassword': (context) => const VerifyEmailForPassword(),
-      '/changePassword': (context) => const ChangePassword(),
-      '/lostandfound': (context) => const lostandfound(),
-      '/hosteliteHome':(context)=>const HosteliteHome(),
-      '/trackroute': (context) => const TrackRoute(),
-      '/trackrouteDriver': (context) => const TrackRouteDriver(),
-      '/guardianTrackRoute': (context) => const GuardianTrackRoute(),
-      '/driverHome': (context) => const DriverHome(),
-      '/requestbusswitching': (context) => const RequestBusSwitching(),
-      '/guardianHome': (context) => const GuardianHome(),
-      '/viewroutestops': (context) => const ViewRouteStops(),
-      '/busesroutes': (context) => const BusesRoutes(),
-      '/feeslip':(context)=>FeesSlipScreen(),
-      '/supervisorHome':(context)=>const SupervisorHome(),
-      '/scanqrcode':(context)=> ScanQrCode(),
-      '/transportfees':(context)=>TransportFeeDepositScreen(),
-    },
-  ));
+
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Initialize local notifications
+  await LocalNotificationService.initialize();
+
+  runApp(MyApp());
+
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  final FirebaseMessagingService _firebaseMessagingService = FirebaseMessagingService();
+
+  @override
+  Future<void> initFM() async {
+    await _firebaseMessagingService.grantAppPermission();
+    await FirebaseMessagingService.init();
+  }
+
+
+  Widget build(BuildContext context) {
+    initFM();
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/splash',
+      routes: {
+        '/login': (context) => const Login(),
+        '/signup': (context) => const Mysignup(),
+        '/passengerHome': (context) => const PassengerHome(),
+        '/generateqrcode': (context) => const GetQrCode(),
+        '/splash': (context) => const Splash(),
+        '/verifyEmail': (context) => const VerifyEmail(),
+        '/editProfile': (context) => const EditProfile(),
+        '/requestroutechange': (context) => const RequestRouteChange(),
+        '/requestscreen': (context) => const RequestScreen(),
+        '/reportanissue': (context) => const Reportanissue(),
+        '/getEmail': (context) => const GetEmail(),
+        '/verifyEmailForPassword': (context) => const VerifyEmailForPassword(),
+        '/changePassword': (context) => const ChangePassword(),
+        '/lostandfound': (context) => const LostAndFound(),
+        '/hosteliteHome': (context) => const HosteliteHome(),
+        '/trackroute': (context) => const TrackRoute(),
+        '/trackrouteDriver': (context) => const TrackRouteDriver(),
+        '/guardianTrackRoute': (context) => const GuardianTrackRoute(),
+        '/driverHome': (context) => const DriverHome(),
+        '/busesroutes':(context)=> const BusesRoutes(),
+        '/requestbusswitching': (context) => const RequestBusSwitching(),
+        '/guardianHome': (context) => const GuardianHome(),
+        '/viewroutestops': (context) => const ViewRouteStops(),
+        '/feeslip': (context) => FeesSlipScreen(),
+        '/supervisorHome': (context) => const SupervisorHome(),
+        '/scanqrcode': (context) => ScanQrCode(),
+        '/transportfees': (context) => TransportFeeDepositScreen(),
+      },
+    );
+  }
 }

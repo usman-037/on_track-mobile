@@ -1,13 +1,10 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:ontrack/dbHelper/constant.dart';
 import 'package:ontrack/dbHelper/mongodb.dart';
 
 class GuardianTrackRoute extends StatefulWidget {
@@ -19,11 +16,11 @@ class GuardianTrackRoute extends StatefulWidget {
 
 class _GuardianTrackRouteState extends State<GuardianTrackRoute> {
   int? routeNo;
+  LatLng? stopCoords2;
+
   final Completer<GoogleMapController> _controller = Completer();
   LocationData? currentLocation;
   LocationData? busLocation;
-  List<LatLng> polylineCoordinates1 = [];
-  List<LatLng> polylineCoordinates2 = [];
   BitmapDescriptor? personIcon;
   BitmapDescriptor? busIcon;
   Timer? timer;
@@ -37,8 +34,8 @@ class _GuardianTrackRouteState extends State<GuardianTrackRoute> {
     double distance = await Geolocator.distanceBetween(
       busLocation!.latitude!,
       busLocation!.longitude!,
-      31.440245896341917,
-      73.13314553744294,
+      stopCoords2!.latitude!,
+      stopCoords2!.longitude!,
     );
 
     double averageSpeed = 10.0; //meters per second
@@ -59,9 +56,7 @@ class _GuardianTrackRouteState extends State<GuardianTrackRoute> {
     });
     setCustomMarker();
     _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      if (routeNo != null) {
-        getPolyPoints();
-        getPolyPointsFromBusLocationToStop();
+      if (routeNo != null && stopCoords2 !=null) {
         calculateEstimatedTime();
       }
     });
@@ -124,70 +119,9 @@ class _GuardianTrackRouteState extends State<GuardianTrackRoute> {
     });
   }
 
-  Future<void> getPolyPoints() async {
-    polylineCoordinates1.clear();
-    PolylinePoints polylinePoints = PolylinePoints();
-    LatLng origin =
-    LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
-    LatLng stopLocation = LatLng(31.440245896341917, 73.13314553744294);
-    LatLng destination = stopLocation;
 
-    print(
-        "Polyline Coordinates (Current Location to Stop): $polylineCoordinates1");
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      google_api_key,
-      PointLatLng(origin.latitude, origin.longitude),
-      PointLatLng(destination.latitude, destination.longitude),
-    );
 
-    if (result.points.isNotEmpty) {
-      polylineCoordinates1.addAll(result.points
-          .map((PointLatLng point) => LatLng(point.latitude, point.longitude)));
-    } else {
-      print("Empty polyline points for route from $origin to $destination");
-    }
-  }
 
-  Future<void> getPolyPointsFromBusLocationToStop() async {
-    final List<LatLng> locations = [
-      LatLng(31.4276475, 73.1239164),
-      LatLng(31.4229034, 73.1177229),
-      LatLng(31.4212829, 73.1198901),
-      LatLng(31.4197253, 73.1222773),
-      LatLng(31.4202761, 73.1161345),
-      LatLng(31.4159077, 73.1117434),
-      LatLng(31.440245896341917, 73.13314553744294), //user's stop
-      LatLng(31.610249422487897, 73.03401091367458) //uni location
-    ];
-
-    polylineCoordinates2.clear();
-    PolylinePoints polylinePoints = PolylinePoints();
-    LatLng origin =
-    LatLng(busLocation!.latitude!, busLocation!.longitude!);
-    locations.sort((a, b) => haversineDistance(
-        origin.latitude, origin.longitude, a.latitude, a.longitude)
-        .compareTo(haversineDistance(
-        origin.latitude, origin.longitude, b.latitude, b.longitude)));
-
-    for (int i = 0; i < locations.length; i++) {
-      LatLng destination = locations[i];
-      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        google_api_key,
-        PointLatLng(origin.latitude, origin.longitude),
-        PointLatLng(destination.latitude, destination.longitude),
-      );
-      if (result.points.isNotEmpty) {
-        setState(() {
-          polylineCoordinates2.addAll(result.points.map(
-                  (PointLatLng point) => LatLng(point.latitude, point.longitude)));
-          origin = destination;
-        });
-      } else {
-        print("Empty polyline points for route segment $i");
-      }
-    }
-    print("Polyline Coordinates: $polylineCoordinates2");
-  }
 
   double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
     const double p = 0.017453292519943295; // Math.PI / 180
@@ -202,13 +136,16 @@ class _GuardianTrackRouteState extends State<GuardianTrackRoute> {
     final args =
     ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     routeNo = args['routeNo'] as int;
+    stopCoords2=args['stopCoords'] as LatLng;
+    LatLng stopCoords = args['stopCoords'] as LatLng;
 
     List<Marker> markers = [];
     String markerIdValue = "stop";
     MarkerId markerId = MarkerId(markerIdValue);
     Marker marker = Marker(
       markerId: markerId,
-      position: LatLng(31.440245896341917, 73.13314553744294),
+      position: stopCoords,
+
       infoWindow: InfoWindow(
         title: 'Estimated time',
         snippet: _estimatedTime,
@@ -253,22 +190,7 @@ class _GuardianTrackRouteState extends State<GuardianTrackRoute> {
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
                 },
-                polylines: {
-                  Polyline(
-                    polylineId: const PolylineId("routeUser"),
-                    points: polylineCoordinates1,
-                    color: Color(0xFF008080), // Change the color as needed
-                    width: 6,
-                  ),
-                  Polyline(
-                    polylineId: const PolylineId("routeBus"),
-                    points: polylineCoordinates2,
-                    // Change this to bus polyline coordinates
-                    color: Colors.pink,
-                    // Change the color as needed
-                    width: 6,
-                  ),
-                },
+
               ))
         ],
       ),

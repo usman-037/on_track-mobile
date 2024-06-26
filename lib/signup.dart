@@ -38,7 +38,6 @@ class _MysignupState extends State<Mysignup> {
     setState(() {
       routes = result;
       routes.sort((a, b) => a.compareTo(b));
-
     });
   }
 
@@ -101,7 +100,6 @@ class _MysignupState extends State<Mysignup> {
                 ],
               ),
             ),
-
             Padding(
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height * 0.28,
@@ -120,8 +118,6 @@ class _MysignupState extends State<Mysignup> {
                 ),
               ),
             ),
-
-
             Container(
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).size.height * 0.32,
@@ -130,7 +126,6 @@ class _MysignupState extends State<Mysignup> {
               ),
               child: Column(
                 children: [
-
                   SizedBox(height: 10),
                   TextField(
                     controller: fnameController,
@@ -195,7 +190,9 @@ class _MysignupState extends State<Mysignup> {
                       ),
                       suffixIcon: IconButton(
                         // Add the suffixIcon
-                        icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
+                        icon: Icon(_showPassword
+                            ? Icons.visibility
+                            : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             _showPassword = !_showPassword;
@@ -226,7 +223,9 @@ class _MysignupState extends State<Mysignup> {
                       ),
                       suffixIcon: IconButton(
                         // Add the suffixIcon
-                        icon: Icon(_showPassword2 ? Icons.visibility : Icons.visibility_off),
+                        icon: Icon(_showPassword2
+                            ? Icons.visibility
+                            : Icons.visibility_off),
                         onPressed: () {
                           setState(() {
                             _showPassword2 = !_showPassword2;
@@ -236,7 +235,6 @@ class _MysignupState extends State<Mysignup> {
                     ),
                   ),
                   SizedBox(height: 10),
-
                   DropdownButtonHideUnderline(
                     child: DropdownButtonFormField<String>(
                       decoration: InputDecoration(
@@ -270,10 +268,7 @@ class _MysignupState extends State<Mysignup> {
                       style: TextStyle(color: Colors.black, fontSize: 16.0),
                     ),
                   ),
-
-
                   SizedBox(height: 20),
-
                   Padding(
                     padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height * 0.01,
@@ -293,12 +288,13 @@ class _MysignupState extends State<Mysignup> {
                     ),
                   ),
                   SizedBox(height: 6),
-
-
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/busesroutes',);
+                        Navigator.pushNamed(
+                          context,
+                          '/busesroutes',
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -329,8 +325,6 @@ class _MysignupState extends State<Mysignup> {
                     ),
                   ),
                   SizedBox(height: 12),
-
-
                   DropdownButtonHideUnderline(
                     child: SingleChildScrollView(
                       child: DropdownButtonFormField<int>(
@@ -375,7 +369,6 @@ class _MysignupState extends State<Mysignup> {
                       ),
                     ),
                   ),
-
                   SizedBox(
                     height: 10,
                   ),
@@ -412,10 +405,8 @@ class _MysignupState extends State<Mysignup> {
                       dropdownColor: const Color(0xFFE3E2E2),
                       style: TextStyle(color: Colors.black, fontSize: 16.0),
                       menuMaxHeight: 200,
-
                     ),
                   ),
-
                   SizedBox(
                     height: 18,
                   ),
@@ -449,8 +440,7 @@ class _MysignupState extends State<Mysignup> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      minimumSize:
-                      Size(MediaQuery.of(context).size.width, 40),
+                      minimumSize: Size(MediaQuery.of(context).size.width, 40),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),
                       ),
@@ -467,7 +457,9 @@ class _MysignupState extends State<Mysignup> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 25,),
+                  SizedBox(
+                    height: 25,
+                  ),
                 ],
               ),
             ),
@@ -476,7 +468,6 @@ class _MysignupState extends State<Mysignup> {
       ),
     );
   }
-
 
   Future<void> _verifyEmail(String fname, String femail, String fpassword,
       String frole, int froute, String fstop) async {
@@ -494,10 +485,10 @@ class _MysignupState extends State<Mysignup> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content:
-            Text('Email already exists! Please use a different email')),
+                Text('Email already exists! Please use a different email')),
       );
     } else if (await _sendCode(femail)) {
-      Navigator.pushNamed(context, '/verifyEmail', arguments: {
+      Navigator.pushReplacementNamed(context, '/verifyEmail', arguments: {
         'fname': fname,
         'femail': femail,
         'fpassword': fpassword,
@@ -549,7 +540,7 @@ class _MysignupState extends State<Mysignup> {
       return true;
     } on MailerException catch (e) {
       print('Error sending email! $e');
-
+      Navigator.pop(context);
       for (var p in e.problems) {
         print('Problem: ${p.code}: ${p.msg}');
       }
@@ -576,5 +567,4 @@ class _MysignupState extends State<Mysignup> {
       ),
     );
   }
-
 }

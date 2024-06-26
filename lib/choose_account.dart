@@ -118,24 +118,19 @@ class _ChooseAccountState extends State<ChooseAccount> {
                                 content: Text('Please fill in all the fields')),
                           );
                         } else if(selectedRole=="Hostelite"){
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             PageRouteBuilder(
-                              pageBuilder: (context, animation,
-                                  secondaryAnimation) {
+                              pageBuilder: (context, animation, secondaryAnimation) {
                                 return HosteliteSignUp();
                               },
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
                                 const begin = Offset(1.0, 0.0);
                                 const end = Offset.zero;
                                 const curve = Curves.easeInOut;
 
-                                var tween = Tween(
-                                    begin: begin, end: end)
-                                    .chain(CurveTween(curve: curve));
-                                var offsetAnimation =
-                                animation.drive(tween);
+                                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                var offsetAnimation = animation.drive(tween);
 
                                 return SlideTransition(
                                   position: offsetAnimation,
@@ -144,26 +139,22 @@ class _ChooseAccountState extends State<ChooseAccount> {
                               },
                             ),
                           );
+
                         }
                         else if(selectedRole=="Guardian"){
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             PageRouteBuilder(
-                              pageBuilder: (context, animation,
-                                  secondaryAnimation) {
+                              pageBuilder: (context, animation, secondaryAnimation) {
                                 return GuardianSignUp();
                               },
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
                                 const begin = Offset(1.0, 0.0);
                                 const end = Offset.zero;
                                 const curve = Curves.easeInOut;
 
-                                var tween = Tween(
-                                    begin: begin, end: end)
-                                    .chain(CurveTween(curve: curve));
-                                var offsetAnimation =
-                                animation.drive(tween);
+                                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                var offsetAnimation = animation.drive(tween);
 
                                 return SlideTransition(
                                   position: offsetAnimation,
@@ -172,26 +163,23 @@ class _ChooseAccountState extends State<ChooseAccount> {
                               },
                             ),
                           );
+
+
                         }
                         else if(selectedRole=="Student/Faculty"){
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             PageRouteBuilder(
-                              pageBuilder: (context, animation,
-                                  secondaryAnimation) {
+                              pageBuilder: (context, animation, secondaryAnimation) {
                                 return Mysignup();
                               },
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
                                 const begin = Offset(1.0, 0.0);
                                 const end = Offset.zero;
                                 const curve = Curves.easeInOut;
 
-                                var tween = Tween(
-                                    begin: begin, end: end)
-                                    .chain(CurveTween(curve: curve));
-                                var offsetAnimation =
-                                animation.drive(tween);
+                                var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                var offsetAnimation = animation.drive(tween);
 
                                 return SlideTransition(
                                   position: offsetAnimation,
@@ -200,6 +188,7 @@ class _ChooseAccountState extends State<ChooseAccount> {
                               },
                             ),
                           );
+
                         }
                       },
                       style: ElevatedButton.styleFrom(

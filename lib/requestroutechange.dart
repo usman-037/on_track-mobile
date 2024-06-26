@@ -118,6 +118,7 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
                 });
               },
             ),
+
             SizedBox(height: 20),
             TextField(
               controller: commentController,
@@ -154,6 +155,7 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
                     );
                   }
                 },
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF03314B),
                   shape: RoundedRectangleBorder(
@@ -174,6 +176,20 @@ class _RequestRouteChangeState extends State<RequestRouteChange> {
                   ),
                 ),
               ),
+
+            ),
+            SizedBox(width: 10),
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/busesroutes');
+              },
+              child: Icon(Icons.arrow_drop_down),
+              mini: true,
+            ),
+            SizedBox(width: 5), // Add spacing between the icon and text
+            Text(
+              'View Routes', // Your desired text
+              style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold,), // Adjust the font size as needed
             ),
           ],
         ),

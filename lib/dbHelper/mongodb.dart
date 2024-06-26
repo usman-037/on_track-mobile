@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:mongo_dart/mongo_dart.dart';
 import 'package:ontrack/dbHelper/constant.dart';
 import 'package:ontrack/MongoDBModel.dart';
+import 'package:http/http.dart' as http;
 
 const int maxReportLimit = 3;
 
@@ -154,6 +158,43 @@ class MongoDatabase {
     return result?["studentEmail"];
   }
 
+  static Future<LatLng> getLatLngFromAddress(String address) async {
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(address)}&key=$google_api_key');
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == 'OK') {
+        final location = data['results'][0]['geometry']['location'];
+        final lat = location['lat'];
+        final lng = location['lng'];
+        return LatLng(lat, lng);
+      } else {
+        throw Exception('Error from Google Maps API: ${data['status']}');
+      }
+    } else {
+      throw Exception('Failed to fetch location from Google Maps API');
+    }
+  }
+  Future<List<Map<String, dynamic>>> fetchlostitems() async {
+    var db = await Db.create(MONGO_CONN_URL);
+    await db.open();
+    var reportandclaimCollection =
+    db.collection(REPORTANDCLAIMLOSTITEMS_COLLECTION);
+
+    try {
+      var cursor = reportandclaimCollection.find();
+      var documents = await cursor.toList();
+      return documents.map((doc) => doc as Map<String, dynamic>).toList();
+    } catch (e) {
+      print('Error querying lost items: $e');
+      return []; // Return an empty list in case of an error
+    } finally {
+      await db.close();
+    }
+  }
   static Future<bool> updateCapacity(int routeNumber) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
@@ -207,7 +248,7 @@ class MongoDatabase {
     });
     await db.close();
     var stopsString = result?["stops"] as String;
-    var stopsList = stopsString.split(',');
+    var stopsList = stopsString.split(':');
     stopsList = stopsList.map((stop) => stop.trim()).toList();
     return stopsList;
   }
@@ -431,23 +472,6 @@ class MongoDatabase {
     }
   }
 
-  static Future<List<Map<String, dynamic>>?> fetchlostitems() async {
-    var db = await Db.create(MONGO_CONN_URL);
-    await db.open();
-    var reportandclainCollection =
-        db.collection(REPORTANDCLAIMLOSTITEMS_COLLECTION);
-
-    try {
-      var cursor = reportandclainCollection.find();
-      var documents = await cursor.toList();
-      return documents.map((doc) => doc as Map<String, dynamic>).toList();
-    } catch (e) {
-      print('Error querying lost items: $e');
-      return null;
-    } finally {
-      await db.close();
-    }
-  }
 
   static Future<String> insertReportAndClaimItem(
       ReportAndClaimItemModel item) async {
@@ -470,13 +494,14 @@ class MongoDatabase {
       await db.close();
     }
   }
+
   static Future<String> claimReportItem(ClaimItemModel item) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
-    var claimcollection = db.collection(
-        CLAIMEDBY_COLLECTION);
+    var claimcollection = db.collection(CLAIMEDBY_COLLECTION);
     try {
-      var result = await claimcollection.insertOne(item.toJson() as Map<String, Object?>);
+      var result = await claimcollection
+          .insertOne(item.toJson() as Map<String, Object?>);
       if (result.isSuccess) {
         return "Data Inserted";
       } else {
@@ -488,14 +513,15 @@ class MongoDatabase {
     } finally {
       await db.close();
     }
-
   }
-  static Future<bool> isItemClaimed(ObjectId itemid,String userEmail) async {
+
+  static Future<bool> isItemClaimed(ObjectId itemid, String userEmail) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
     var claimCollection = db.collection(CLAIMEDBY_COLLECTION);
     try {
-      var result = await claimCollection.findOne(where.eq('itemid', itemid).eq('claimby', userEmail));
+      var result = await claimCollection
+          .findOne(where.eq('itemid', itemid).eq('claimby', userEmail));
       return result != null;
     } catch (e) {
       print('Error checking item claim: $e');
@@ -504,7 +530,6 @@ class MongoDatabase {
       await db.close();
     }
   }
-
 
   static Future<bool> insertGuardian(GuardianModel data) async {
     var db = await Db.create(MONGO_CONN_URL);
@@ -598,7 +623,7 @@ class MongoDatabase {
     var userCollection = db.collection(USER_COLLECTION);
     try {
       var result = await userCollection.findOne({
-        "phoneNo": fphone,
+        "email": fphone,
         "studentEmail": fstdemail,
       });
       return result !=
@@ -610,6 +635,7 @@ class MongoDatabase {
       await db.close();
     }
   }
+
   static Future<String> insertpayment(PaymentDetails data) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
@@ -629,6 +655,7 @@ class MongoDatabase {
       await db.close();
     }
   }
+
   static Future<String> inserttransportpayment(TransportFeeDetails data) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
@@ -648,6 +675,7 @@ class MongoDatabase {
       await db.close();
     }
   }
+
   static Future<bool> insertAttendance(Attendance data) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
@@ -685,6 +713,7 @@ class MongoDatabase {
       await db.close();
     }
   }
+
   static Future<void> updateFeeStatus(String femail, String status) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
@@ -701,21 +730,19 @@ class MongoDatabase {
       await db.close();
     }
   }
+
   //Rabia's -------------------------------------------------------------------------
   static Future<List<int>> queryFetchRouteCapacity(int routeNumber) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
     var routeCollection = db.collection(ROUTES_COLLECTION);
-    var cursor = routeCollection.find({
-      "route_no": routeNumber
-    });
+    var cursor = routeCollection.find({"route_no": routeNumber});
     var documents = await cursor.toList();
-    var routeCapacities = documents.map((doc) => doc["capacity"] as int).toList();
+    var routeCapacities =
+        documents.map((doc) => doc["capacity"] as int).toList();
     await db.close();
     return routeCapacities;
   }
-
-
 
   static Future<List<int>> queryFetchLiveRoutes() async {
     var db = await Db.create(MONGO_CONN_URL);
@@ -733,20 +760,89 @@ class MongoDatabase {
     return routeNumbers;
   }
 
-  static Future<List<Map<String, dynamic>>> queryFetchLiveTrackCoordinates(int routeNo) async {
+  static Future<List<Map<String, dynamic>>> queryFetchLiveTrackCoordinates(
+      int routeNo) async {
     var db = await Db.create(MONGO_CONN_URL);
     await db.open();
     var livetrackCollection = db.collection(TRACKING_COLLECTION);
-    var cursor = livetrackCollection.find({
-      "routeNo": routeNo
-    });
+    var cursor = livetrackCollection.find({"routeNo": routeNo});
     var documents = await cursor.toList();
-    var coordinates = documents.map((doc) => {
-      "longitude": doc["longitude"] as double,
-      "latitude": doc["latitude"] as double,
-    }).toList();
+    var coordinates = documents
+        .map((doc) => {
+              "longitude": doc["longitude"] as double,
+              "latitude": doc["latitude"] as double,
+            })
+        .toList();
     await db.close();
     return coordinates;
+  }
+
+  static Future<LatLng> getCoords(String femail) async {
+    var db = await Db.create(MONGO_CONN_URL);
+    await db.open();
+    var userCollection = db.collection(USER_COLLECTION);
+    var result = await userCollection.findOne({"email": femail});
+    await db.close();
+
+    if (result != null &&
+        result["stoplat"] != null &&
+        result["stoplng"] != null) {
+      double stoplat = result["stoplat"];
+      double stoplng = result["stoplng"];
+      return LatLng(stoplat, stoplng);
+    } else {
+      throw Exception('Stop coordinates not found for the given email');
+    }
+  }
+
+  static Future<List<LatLng>> getLatLngList(String femail) async {
+    var db = await Db.create(MONGO_CONN_URL);
+    await db.open();
+    var userCollection = db.collection(USER_COLLECTION);
+    var result = await userCollection.findOne({"email": femail});
+
+    if (result != null && result["role"] == "Driver") {
+      var routeNo = result["route"]; // Assuming the route number is stored under the key 'route'
+      var routesCollection = db.collection(ROUTES_COLLECTION);
+      var routeData = await routesCollection.findOne({"route_no": routeNo});
+
+      if (routeData != null) {
+        List<double> latitudes = List<double>.from(routeData["latitude"]);
+        List<double> longitudes = List<double>.from(routeData["longitude"]);
+
+        List<LatLng> latLngList = [];
+        for (int i = 0; i < latitudes.length; i++) {
+          latLngList.add(LatLng(latitudes[i], longitudes[i]));
+        }
+
+        await db.close();
+        return latLngList;
+      } else {
+        await db.close();
+        throw Exception("Route not found");
+      }
+    } else {
+      await db.close();
+      throw Exception("Error querying the database");
+    }
+  }
+  static Future<Map<int, List<String>>> queryFetchAllRoutes() async {
+    var db = await Db.create(MONGO_CONN_URL);
+    await db.open();
+    var routeCollection = db.collection(ROUTES_COLLECTION);
+    var routesCursor = await routeCollection.find();
+
+    Map<int, List<String>> allRoutes = {};
+
+    await for (var route in routesCursor) {
+      int routeNumber = route["route_no"] as int;
+      var stopsString = route["stops"] as String;
+      var stopsList = stopsString.split(':').map((stop) => stop.trim()).toList();
+      allRoutes[routeNumber] = stopsList;
+    }
+    await db.close();
+
+    return allRoutes;
   }
 
 }

@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class TransportFeeSlipScreen extends StatelessWidget {
   final String name;
-  final String rollNo;
-  final String section;
+  final String femail;
   final int routeNumber;
   final String transactionid;
   final DateTime transactiondate;
@@ -18,8 +16,7 @@ class TransportFeeSlipScreen extends StatelessWidget {
 
   TransportFeeSlipScreen({
     required this.name,
-    required this.rollNo,
-    required this.section,
+    required this.femail,
     required this.routeNumber,
     required this.transactionid,
     required this.transactiondate,
@@ -33,7 +30,14 @@ class TransportFeeSlipScreen extends StatelessWidget {
     await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List pngBytes = byteData!.buffer.asUint8List();
     await ImageGallerySaver.saveImage(pngBytes, name: 'bus_pass_image');
-    Fluttertoast.showToast(msg: "Bus pass image saved successfully");
+    void showSnackBar(BuildContext context) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Bus Pass Image saved successfully!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -81,12 +85,7 @@ class TransportFeeSlipScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 10.0),
                         Text(
-                          'Roll No: $rollNo',
-                          style: TextStyle(fontSize: 18.0),
-                        ),
-                        SizedBox(height: 10.0),
-                        Text(
-                          'Section: $section',
+                          'Roll No: $femail',
                           style: TextStyle(fontSize: 18.0),
                         ),
                         SizedBox(height: 10.0),
@@ -106,7 +105,7 @@ class TransportFeeSlipScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 20.0),
                         QrImageView(
-                          data: '$name\n$rollNo\n$section\n$routeNumber\n$transactionid\n${DateFormat('yyyy-MM-dd').format(transactiondate)}',
+                          data: '$name\n$femail\n$routeNumber\n$transactionid\n${DateFormat('yyyy-MM-dd').format(transactiondate)}',
                           version: QrVersions.auto,
                           size: 200.0,
                         ),

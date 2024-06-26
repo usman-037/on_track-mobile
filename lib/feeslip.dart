@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:crypto/crypto.dart';
 import 'package:ontrack/MongoDBModel.dart';
 import 'BusPassScreen.dart';
@@ -43,6 +42,8 @@ class _FeesSlipScreenState extends State<FeesSlipScreen> {
   late String superData;
   late DateTime selectedDate;
   bool isLoading = false;
+  late final String femail;
+  late final String userName;
 
   @override
   void initState() {
@@ -140,10 +141,8 @@ class _FeesSlipScreenState extends State<FeesSlipScreen> {
       var body = jsonDecode(res);
       var responsePrice = body['pp_Amount'];
       insertPaymentDetails(
-          nameController.text,
-          rollNoController.text,
-          sectionController.text,
-          int.parse(routeNoController.text),
+          userName,
+         femail,
           tre,
           DateTime.now(),
           selectedDate);
@@ -152,14 +151,21 @@ class _FeesSlipScreenState extends State<FeesSlipScreen> {
       routeNoController.clear();
       rollNoController.clear();
       sectionController.clear();*/
-      Fluttertoast.showToast(msg: "Payment successful: $responsePrice");
+      //Fluttertoast.showToast(msg: "Payment successful: $responsePrice");
+      void showSnackBar(BuildContext context) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment successful!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => BusPassScreen(
             name: nameController.text,
-            rollNo: rollNoController.text,
-            section: sectionController.text,
+            femail: femail,
             routeNumber: int.parse(routeNoController.text),
             travelDate: selectedDate,
             transactionid: tre,
@@ -168,7 +174,14 @@ class _FeesSlipScreenState extends State<FeesSlipScreen> {
       );
     } else {
       Navigator.pop(context);
-      Fluttertoast.showToast(msg: "Payment failed");
+      void showSnackBar(BuildContext context) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment Failed!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
 
     setState(() {
@@ -176,13 +189,11 @@ class _FeesSlipScreenState extends State<FeesSlipScreen> {
     });
   }
 
-  Future<void> insertPaymentDetails(String name, String rollNo, String section,
-      int routeno, String transactionId, DateTime transactionDate, DateTime travelDate) async {
+  Future<void> insertPaymentDetails(String name, String femail,
+ String transactionId, DateTime transactionDate, DateTime travelDate) async {
     final data = PaymentDetails(
         name: name,
-        rollno: rollNo,
-        section: section,
-        routeno: routeno,
+       femail:femail,
         transactionid: transactionId,
         transactiondate: transactionDate,
         traveldate: travelDate);
@@ -209,6 +220,10 @@ class _FeesSlipScreenState extends State<FeesSlipScreen> {
 
   @override
   Widget build(BuildContext context) {
+    userName = (ModalRoute.of(context)!.settings.arguments
+    as Map<String, dynamic>)['userName'];
+    femail = (ModalRoute.of(context)!.settings.arguments
+    as Map<String, dynamic>)['femail'];
     return Scaffold(
       appBar: AppBar(
         title: Text('Bus Pass Form', style: TextStyle(color: Colors.white)),
@@ -221,76 +236,17 @@ class _FeesSlipScreenState extends State<FeesSlipScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: nameController,
-                maxLength: 25,
-                decoration: InputDecoration(
-                  counterText: '',
-                  fillColor: const Color.fromARGB(27, 0, 0, 0),
-                  filled: true,
-                  hintText: "Hostelite Student Name",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+              Text(
+                'Name: $userName',
+                style: TextStyle(fontSize: 16.0),
               ),
-              SizedBox(
-                height: 15,
+              SizedBox(height: 10),
+              Text(
+                'Roll No: $femail',
+                style: TextStyle(fontSize: 16.0),
               ),
-              TextField(
-                controller: rollNoController,
-                maxLength: 25,
-                decoration: InputDecoration(
-                  counterText: '',
-                  fillColor: const Color.fromARGB(27, 0, 0, 0),
-                  filled: true,
-                  hintText: "Roll Number",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              TextField(
-                controller: sectionController,
-                maxLength: 25,
-                decoration: InputDecoration(
-                  counterText: '',
-                  fillColor: const Color.fromARGB(27, 0, 0, 0),
-                  filled: true,
-                  hintText: "Section",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              TextField(
-                controller: routeNoController,
-                maxLength: 25,
-                decoration: InputDecoration(
-                  counterText: '',
-                  fillColor: const Color.fromARGB(27, 0, 0, 0),
-                  filled: true,
-                  hintText: "Route Number",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
-              ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
+
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

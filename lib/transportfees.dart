@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
-import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -20,6 +19,7 @@ class TransportFeeDepositScreen extends StatefulWidget {
 }
 
 class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
+
   TextEditingController nameController = TextEditingController();
   TextEditingController rollNoController = TextEditingController();
   TextEditingController sectioncontroller = TextEditingController();
@@ -48,7 +48,9 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
   late String superData;
   late DateTime selectedDate;
   bool isLoading = false;
-  late  String femail;
+  late final String femail;
+  late final int routeNo;
+  late final String userName;
 
   @override
   void initState() {
@@ -65,7 +67,7 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
     ppMerchantID = "MC83924";
     ppPassword = "y40ytt9u62";
     ppReturnURL =
-        "https://sandbox.jazzcash.com.pk/ApplicationAPI/API/Payment/DoTransaction";
+    "https://sandbox.jazzcash.com.pk/ApplicationAPI/API/Payment/DoTransaction";
     ppVer = "1.1";
     ppTxnCurrency = "PKR";
     ppTxnDateTime = dateAndTime;
@@ -149,24 +151,22 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
       var responsePrice = body['pp_Amount'];
       await MongoDatabase.updateFeeStatus(femail, 'paid');
       insertPaymentDetails(
-        nameController.text,
-        rollNoController.text,
-        sectioncontroller.text,
+        userName,
+        femail,
         tre,
-        int.parse(routenocontroller.text),
+        routeNo,
         DateTime.now(),
       );
       isPaid = true;
       Navigator.pop(context);
-      Fluttertoast.showToast(msg: "Payment successful: $responsePrice");
+      //Fluttertoast.showToast(msg: "Payment successful: $responsePrice");
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => TransportFeeSlipScreen(
-            name: nameController.text,
-            rollNo: rollNoController.text,
-            section: sectioncontroller.text,
-            routeNumber: int.parse(routenocontroller.text),
+            name: userName,
+            femail: femail,
+            routeNumber: routeNo,
             transactionid: tre,
             transactiondate: DateTime.now(),
           ),
@@ -179,7 +179,16 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
       routenocontroller.clear();
       rollNoController.clear();
       sectioncontroller.clear();
-      Fluttertoast.showToast(msg: "Payment failed");
+      void showSnackBar(BuildContext context) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment Failed!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+
     }
 
     setState(() {
@@ -188,12 +197,11 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
     // Close the dialog
   }
 
-  Future<void> insertPaymentDetails(String name, String rollNo, String section,
+  Future<void> insertPaymentDetails(String name,String femail,
       String transactionId, int routeno, DateTime transactionDate) async {
     final data = TransportFeeDetails(
       name: name,
-      rollno: rollNo,
-      section: section,
+      femail:femail,
       transactionid: transactionId,
       routeno: routeno,
       transactiondate: transactionDate,
@@ -203,10 +211,16 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Initialize femail
-    femail = (ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>)['femail'];
   }
   @override
   Widget build(BuildContext context) {
+    userName = (ModalRoute.of(context)!.settings.arguments
+    as Map<String, dynamic>)['userName'];
+    femail = (ModalRoute.of(context)!.settings.arguments
+    as Map<String, dynamic>)['femail'];
+    routeNo = (ModalRoute.of(context)!.settings.arguments
+    as Map<String, dynamic>)['routeNo'];
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Transport Fee Deposit', style: TextStyle(color: Colors.white)),
@@ -220,73 +234,24 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: nameController,
-                maxLength: 25,
-                decoration: InputDecoration(
-                  counterText: '',
-                  fillColor: const Color.fromARGB(27, 0, 0, 0),
-                  filled: true,
-                  hintText: "Name",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+              Text(
+                'Name: $userName',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
-              SizedBox(height: 20),
-              TextField(
-                controller: rollNoController,
-                maxLength: 25,
-                decoration: InputDecoration(
-                  counterText: '',
-                  fillColor: const Color.fromARGB(27, 0, 0, 0),
-                  filled: true,
-                  hintText: "Roll No",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+              SizedBox(height: 10),
+              Text(
+                'Roll No: $femail',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
-              SizedBox(height: 20),
-              TextField(
-                controller: sectioncontroller,
-                maxLength: 25,
-                decoration: InputDecoration(
-                  counterText: '',
-                  fillColor: const Color.fromARGB(27, 0, 0, 0),
-                  filled: true,
-                  hintText: "Section",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
-                controller: routenocontroller,
-                maxLength: 25,
-                decoration: InputDecoration(
-                  counterText: '',
-                  fillColor: const Color.fromARGB(27, 0, 0, 0),
-                  filled: true,
-                  hintText: "Route Number",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
+              SizedBox(height: 10),
+              Text(
+                'Route Number: $routeNo',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
               SizedBox(height: 20),
               Text(
                 'Transport Pass: Rs. 30000',
-                style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -338,6 +303,7 @@ class _TransportFeeDepositScreenState extends State<TransportFeeDepositScreen> {
                 Text(
                   'Payment Status: Paid',
                   style: TextStyle(
+                    fontSize: 18.0,
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
                   ),

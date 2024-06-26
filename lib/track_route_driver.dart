@@ -18,19 +18,10 @@ class TrackRouteDriverState extends State<TrackRouteDriver> {
   int? routeNo;
   final Completer<GoogleMapController> _controller = Completer();
   LocationData? currentLocation;
-  List<LatLng> polylineCoordinates = [];
   BitmapDescriptor? driverIcon;
-  final List<LatLng> latLngList = [
-    LatLng(31.4276475, 73.1239164),
-    LatLng(31.4229034, 73.1177229),
-    LatLng(31.4212829, 73.1198901),
-    LatLng(31.4197253, 73.1222773),
-    LatLng(31.4202761, 73.1161345),
-    LatLng(31.4159077, 73.1117434),
-    LatLng(31.440245896341917, 73.13314553744294),
-    LatLng(31.610249422487897, 73.03401091367458) //uni location
-  ];
+
   late Timer _timer;
+
   @override
   void initState() {
     super.initState();
@@ -38,11 +29,7 @@ class TrackRouteDriverState extends State<TrackRouteDriver> {
       getCurrentLocation();
     });
     setCustomMarker();
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      if (routeNo != null) {
-        getPolyPoints();
-      }
-    });
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {});
   }
 
   @override
@@ -84,40 +71,9 @@ class TrackRouteDriverState extends State<TrackRouteDriver> {
         currentLocation = newLoc;
         MongoDatabase.sendLocationToMongoDB(newLoc, routeNo);
       });
-
     });
   }
 
-  Future<void> getPolyPoints() async {
-    polylineCoordinates.clear();
-    List<LatLng> locations = latLngList;
-    PolylinePoints polylinePoints = PolylinePoints();
-    LatLng origin =
-        LatLng(currentLocation!.latitude!, currentLocation!.longitude!);
-    locations.sort((a, b) =>
-        haversineDistance(origin.latitude, origin.longitude, a.latitude,
-            a.longitude)
-            .compareTo(haversineDistance(origin.latitude, origin.longitude,
-            b.latitude, b.longitude)));
-    for (int i = 0; i < locations.length; i++) {
-      LatLng destination = locations[i];
-      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        google_api_key,
-        PointLatLng(origin.latitude, origin.longitude),
-        PointLatLng(destination.latitude, destination.longitude),
-      );
-      if (result.points.isNotEmpty) {
-        setState(() {
-          polylineCoordinates.addAll(result.points.map(
-              (PointLatLng point) => LatLng(point.latitude, point.longitude)));
-          origin = destination;
-        });
-      } else {
-        print("Empty polyline points for route segment $i");
-      }
-    }
-    print("Polyline Coordinates: $polylineCoordinates");
-  }
   double haversineDistance(double lat1, double lon1, double lat2, double lon2) {
     const double p = 0.017453292519943295; // Math.PI / 180
     double a = 0.5 -
@@ -125,25 +81,14 @@ class TrackRouteDriverState extends State<TrackRouteDriver> {
         cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2;
     return 12742 * asin(sqrt(a)); // 2 * R; R = 6371 km
   }
+
   @override
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    // final latLngList = args['latlngList'] as List<LatLng>;
     routeNo = args['routeNo'] as int;
-
+    List<LatLng> latLngList = args['latlngList'] as List<LatLng>;
     List<Marker> markers = [];
-    // for (int i = 0; i < latLngList.length; i++) {
-    //   LatLng location = latLngList[i];
-    //   String markerIdValue = "stop_$i";
-    //
-    //   MarkerId markerId = MarkerId(markerIdValue);
-    //   Marker marker = Marker(
-    //     markerId: markerId,
-    //     position: location,
-    //   );
-    //   markers.add(marker);
-    // }
 
     for (int i = 0; i < latLngList.length; i++) {
       LatLng location = latLngList[i];
@@ -184,14 +129,6 @@ class TrackRouteDriverState extends State<TrackRouteDriver> {
               onMapCreated: (GoogleMapController controller) {
                 _controller.complete(controller);
                 // getPolyPoints();
-              },
-              polylines: {
-                Polyline(
-                  polylineId: const PolylineId("route"),
-                  points: polylineCoordinates,
-                  color: const Color(0xFF7B61FF),
-                  width: 6,
-                ),
               },
             ),
     );

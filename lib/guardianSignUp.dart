@@ -317,60 +317,58 @@ BuildContext? _signup;
     });
   }
 
-  Future<void> _insertData(BuildContext cont,String fname, String fphone, String fpassword, String fstdemail) async {
-    try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          content: CircularProgressIndicator(),
-        ),
-      );
+}
+Future<void> _insertData(BuildContext context, String fname, String fphone, String fpassword, String fstdemail) async {
+  try {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: CircularProgressIndicator(),
+      ),
+    );
 
-      final data = GuardianModel(
-        name: fname,
-        email: fphone,
-        password: fpassword,
-        studentEmail: fstdemail,
-      );
+    final data = GuardianModel(
+      name: fname,
+      email: fphone,
+      password: fpassword,
+      studentEmail: fstdemail,
+    );
 
-      final phoneStdmailexists = await MongoDatabase.queryphoneStdmailexists(fphone, fstdemail);
-      print('initialC');
-      print(context);
-      if (!phoneStdmailexists) {
-        final inserted = await MongoDatabase.insertGuardian(data);
+    final phoneStdmailexists = await MongoDatabase.queryphoneStdmailexists(fphone, fstdemail);
+    if (!phoneStdmailexists) {
+      final inserted = await MongoDatabase.insertGuardian(data);
 
-        if (inserted) {
-          final scaffoldContext = ScaffoldMessenger.of(context);
-          scaffoldContext.showSnackBar(
-            SnackBar(
-              content: Text('Signup successful!'),
-              duration: Duration(seconds: 1),
-            ),
-          );
-          print("Navigating to login screen...");
-          Navigator.pushReplacementNamed(cont, '/login');
-        }
-      } else {
-        final scaffoldContext = ScaffoldMessenger.of(context);
-        scaffoldContext.showSnackBar(
+      if (inserted) {
+        Navigator.pop(context); // Close the dialog before showing SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Guardian already registered for student email'),
-            duration: Duration(seconds: 3),
+            content: Text('Signup successful!'),
+            duration: Duration(seconds: 1),
           ),
         );
-        print("Navigating to signup screen...");
-        Navigator.pushReplacementNamed(context, '/signup');
+        print("Navigating to login screen...");
+        Navigator.pushReplacementNamed(context, '/login');
       }
-    } catch (e) {
-      print('Error inserting data: $e');
-    } finally {
-      Navigator.pop(context);
+    } else {
+      Navigator.pop(context); // Close the dialog before showing SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Guardian already registered for student email'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      print("Navigating to signup screen...");
+      Navigator.pushReplacementNamed(context, '/login');
     }
+  } catch (e) {
+    print('Error inserting data: $e');
+    Navigator.pop(context); // Ensure dialog is closed on error
   }
-
-
 }
+
+
+
 
   Widget _buildGradientText(String text, List<Color> colors) {
   return ShaderMask(
