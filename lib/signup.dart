@@ -527,8 +527,8 @@ class _MysignupState extends State<Mysignup> {
   Future<bool> _sendCode(String femail) async {
     code = _generateRandomCode();
     try {
-      var userEmail = 'ontrackfyp@gmail.com';
-      var password = 'rrykntjptdaxaqqa';
+      var userEmail = 'YOUR GMAIL HERE';
+      var password = 'YOUR PASSWORD HERE';
       var message = Message();
       message.subject = 'Verification Code for On Track';
       message.text = 'Your verification code is $code';
